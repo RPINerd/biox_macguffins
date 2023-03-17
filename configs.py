@@ -9,3 +9,6 @@ TABIX_PATH      = ""
 # select_probes.py
 DPCR_ASSAY_CODE = ""
 DPCR_GENOME_FA  = ""
+
+# dircutadapt.py
+CUTADAPT_DIR    = ""
