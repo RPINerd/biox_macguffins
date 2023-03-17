@@ -48,7 +48,7 @@ def main():
     if args.verbose:
         print( "Read ID: " + id )
         print( "Suffix: " + suffix )
-    
+
     ## Collection and pairing of reads
     # Use provided pattern to collect R1 reads
     r1_out = id + "_R1_Matches.fastq"
