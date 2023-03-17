@@ -1,2 +1,16 @@
+# IDE
 *.vscode
-configs.py
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Logging stuff
+*log*.txt
+*.log
+
+# Internal only
+configs.internal.py
+select_probes.py
+webserver_primer_pull.py
