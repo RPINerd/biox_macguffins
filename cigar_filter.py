@@ -12,7 +12,9 @@ import re
 
 def main() -> None:
     
-    for line in open(sys.argv[1]):
+    out = open(sys.argv[2], "w")
+
+    for line in open(sys.argv[1], "r"):
         if line.startswith("@"):
             continue
         cols = line.split("\t")
@@ -20,6 +22,7 @@ def main() -> None:
         filter = re.match("([0-9]+)M", cols[5])
         if filter and int(filter[1]) >= 50:
             print(cols[2], cols[3], cols[5])
+            out.write("\t".join([cols[2], cols[3], cols[5]]) + "\n")
 
 if __name__ == "__main__":
     main()
