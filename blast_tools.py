@@ -67,7 +67,6 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output", help="Designates a user-defined output file", default="output.txt")
     parser.add_argument("--trimselfhits", action="store_true")
     parser.add_argument("--pickbesthit", action="store_true")
-    #parser.add_argument("-p", "--process", help="Selection of analysis tool", required=True)
     args = parser.parse_args()
 
     main(args)

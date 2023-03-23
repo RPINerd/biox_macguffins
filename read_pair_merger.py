@@ -7,10 +7,6 @@ r1_file = sys.argv[1]
 r2_file = sys.argv[2]
 result_file = sys.argv[3]
 
-#! Debug Print
-#print(r1_file)
-#print(r2_file)
-
 reads_1 = []
 reads_2 = []
 r1_count = 0
@@ -49,14 +45,7 @@ else:
         if header:
             header = False
             out_file.write("Read 1,Read 2,%R2 >= 20T : " + str( (t_run / r2_count) * 100 ) + "\n")
-
-            #! Debug Print
-            #print("Read 1\tRead 2\t%R2 >= 20T : " + str( (t_run / r2_count) * 100 ))
-
             next
-
-        #! Debug Print
-        #print("R1: " + reads_1[r] + "\nR2: " + reads_2[r] + "-------------------")
 
         out_file.write( str(reads_1[r]) + "," + str(reads_2[r]) + "\n")
 
