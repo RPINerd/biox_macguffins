@@ -15,27 +15,28 @@ import sys
     
 '''
 
-try:
-    ref_file = open(sys.argv[1], "r")
-except FileNotFoundError:
-    print("Reference file not found!")
-else:
+with open(sys.argv[1], "r") as ref_file:
     with open("out.bed", "w") as output:
         for line in ref_file:
-            columns = ref_file.split("\t")
+            columns = line.split("\t")
 
-            repType     = columns[11]
-            if repType not in ["Simple_repeat", "Low_complexity", "Satellite"]:
-                continue
             genomeName  = columns[5]
             genomeStart = int(columns[6])
             genomeEnd   = int(columns[7])
-            totalLen    = genomeEnd - genomeStart
             repBase     = str(columns[10])
-            unitLen     = len(repBase.strip("()n"))
-            repLen      = int(totalLen / unitLen)
+            repType     = columns[11]
+            totalLen    = genomeEnd - genomeStart
 
-            info_column = "|".join([repType, totalLen, unitLen, repLen, repBase])
-            bed_entry = "\t".join([genomeName, genomeStart, genomeEnd, info_column])
+            if repType == "Simple_repeat":
+                unitLen     = len(repBase.strip("()n"))
+                repLen      = int(totalLen / unitLen)
+            elif repType in ["Low_complexity", "Satellite"]:
+                unitLen     = "."
+                repLen      = "."
+            else:
+                continue
+            
+            info_column = "|".join([repType, str(totalLen), str(unitLen), str(repLen), repBase])
+            bed_entry = "\t".join([genomeName, str(genomeStart), str(genomeEnd), info_column])
 
             output.write(bed_entry + "\n")
