@@ -6,6 +6,8 @@ import re
     grep_reads
     Chris Howard | 04/06/23
 
+    RETIRED: My fastq filtering script (https://github.com/RPINerd/fastq_filtering) does basically the same thing but with more flexibility and in a neater way
+
     Given a regex (or file of expressions) to look for, grep_reads will find all reads that contain said pattern in the R1 fastq files provided. Then it will write these desired reads to a new fastq file and then extract the matching paired reads from R2.
 '''
 
