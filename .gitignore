@@ -10,6 +10,9 @@ __pycache__/
 *log*.txt
 *.log
 
+# Note taking
+*.txt
+
 # Internal only
 configs.internal.py
 select_probes.py
