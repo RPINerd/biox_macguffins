@@ -8,7 +8,7 @@
 
 import sys
 
-from Bio import Align, SeqIO
+from Bio import Align, Seq, SeqIO
 
 # Read in the input files
 input_file_1 = sys.argv[1]
@@ -21,11 +21,23 @@ sequences_2 = []
 names_1 = []
 names_2 = []
 for record in SeqIO.parse(input_file_1, "fasta"):
-    sequences_1.append(record.seq)
+    if len(record.seq) <= 30:
+        seq = Seq.reverse_complement(record.seq)
+    else:
+        seq = record.seq
+    sequences_1.append(seq)
     names_1.append(record.id)
 for record in SeqIO.parse(input_file_2, "fasta"):
     sequences_2.append(record.seq)
     names_2.append(record.id)
+
+# Set up an aligner
+aligner = Align.PairwiseAligner()
+aligner.mode = "local"
+aligner.open_gap_score = -2.0
+aligner.extend_gap_score = -0.5
+aligner.target_end_gap_score = 0.0
+aligner.query_end_gap_score = 0.0
 
 # Create a list of the alignments
 alignments = []
@@ -34,7 +46,7 @@ for i in range(len(sequences_1)):
         alignments.append(
             [
                 f">{names_1[i]}::{names_2[j]}",
-                Align.PairwiseAligner().align(sequences_1[i], sequences_2[j]),
+                aligner.align(sequences_1[i], sequences_2[j]),
             ]
         )
 
