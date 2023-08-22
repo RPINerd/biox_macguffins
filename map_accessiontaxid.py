@@ -54,26 +54,22 @@ def main(args):
     conn = sqlite3.connect(args.reference)
     c = conn.cursor()
 
-    # Create a list of the input sequences
-    input_list = []
+    # Create a list of the output sequences from stepping throught the input sequences and querying the database
+    output_list = []
     for record in SeqIO.parse(args.input, "fasta"):
         accession = record.id.split(" ")[0]
         # print(f"Processing {accession}")
         info = " ".join(record.id.split(" ")[1:])
         # print(f"Info: {info}")
-        input_list.append([accession, info, record.seq])
 
-    # Create a list of the output sequences
-    output_list = []
-    for record in input_list:
         # taxid, gi = accession_to_taxid(record[0], ref_dict)
         # output_list.append([record[0], record[1], taxid, record[2]])
-        c.execute("SELECT taxid, gi FROM data WHERE accession=?", (record[0],))
+        c.execute("SELECT taxid, gi FROM data WHERE accession=?", (accession,))
         result = c.fetchone()
         if result is None:
-            output_list.append([record[0], record[1], "NA", record[2]])
+            output_list.append([accession, info, "NA", record.seq])
         else:
-            output_list.append([record[0], record[1], result[0], record[2]])
+            output_list.append([accession, info, result[0], record.seq])
 
     # Write the output to a tsv file
     with open(args.output, "w") as output:
