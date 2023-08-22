@@ -57,9 +57,11 @@ def main(args):
     # Create a list of the output sequences from stepping throught the input sequences and querying the database
     output_list = []
     for record in SeqIO.parse(args.input, "fasta"):
-        accession = record.id.split(" ")[0]
+        accession = record.id
+        # print(record.description)
         # print(f"Processing {accession}")
-        info = " ".join(record.id.split(" ")[1:])
+        # print(f"ID: {record.id}")
+        info = record.description
         # print(f"Info: {info}")
 
         # taxid, gi = accession_to_taxid(record[0], ref_dict)
@@ -67,14 +69,14 @@ def main(args):
         c.execute("SELECT taxid, gi FROM data WHERE accession=?", (accession,))
         result = c.fetchone()
         if result is None:
-            output_list.append([accession, info, "NA", record.seq])
+            output_list.append([accession, "NA", info, record.seq])
         else:
-            output_list.append([accession, info, result[0], record.seq])
+            output_list.append([accession, result[0], info, str(record.seq)])
 
     # Write the output to a tsv file
     with open(args.output, "w") as output:
         # Header line
-        output.write("accession\tinfo\ttaxid\tsequence\n")
+        output.write("accession\ttaxid\tinfo\tsequence\n")
         for i in range(len(output_list)):
             output.write("\t".join(output_list[i]) + "\n")
 
