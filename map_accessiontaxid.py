@@ -1,13 +1,19 @@
-# Given an ITS fasta file, create a tsv output that maps the accession numbers to a taxid
-# Priority for taxid lookup is:
-#   nucl_gb
-#   nucl_wgs
-#   nucl_wgs_extra
-#   dead_nucl
-#   dead_wgs
+"""
+    Accession to TaxID Mapping | RPINerd, 08/22/23
+
+    Given a fasta input file and reference database, create a tsv output that maps the accession numbers to a taxid
+
+    Priority for taxid lookup is:
+      nucl_gb
+      nucl_wgs
+      nucl_wgs_extra
+      dead_nucl
+      dead_wgs
+"""
 
 
 import argparse
+import sqlite3
 
 from Bio import SeqIO
 
@@ -42,7 +48,11 @@ def accession_to_taxid(accession, ref_dict) -> str:
 
 def main(args):
     # Create a dictionary of the reference sequences
-    ref_dict = indexing(args.reference)
+    # ref_dict = indexing(args.reference)
+
+    # Create a connection to the provided database
+    conn = sqlite3.connect(args.reference)
+    c = conn.cursor()
 
     # Create a list of the input sequences
     input_list = []
@@ -56,11 +66,19 @@ def main(args):
     # Create a list of the output sequences
     output_list = []
     for record in input_list:
-        taxid, gi = accession_to_taxid(record[0], ref_dict)
-        output_list.append([record[0], record[1], taxid, record[2]])
+        # taxid, gi = accession_to_taxid(record[0], ref_dict)
+        # output_list.append([record[0], record[1], taxid, record[2]])
+        c.execute("SELECT taxid, gi FROM data WHERE accession=?", (record[0],))
+        result = c.fetchone()
+        if result is None:
+            output_list.append([record[0], record[1], "NA", record[2]])
+        else:
+            output_list.append([record[0], record[1], result[0], record[2]])
 
     # Write the output to a tsv file
     with open(args.output, "w") as output:
+        # Header line
+        output.write("accession\tinfo\ttaxid\tsequence\n")
         for i in range(len(output_list)):
             output.write("\t".join(output_list[i]) + "\n")
 
@@ -87,7 +105,7 @@ if __name__ == "__main__":
         "--reference",
         type=str,
         required=True,
-        help="Path to reference files",
+        help="Reference database file",
     )
     args = parser.parse_args()
 
