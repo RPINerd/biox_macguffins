@@ -1,10 +1,13 @@
-# Given two input files in fasta format, align each pair of sequences and output the alignments into a single file
+"""
+    Pairwise Align | RPINerd, 08/22/23
 
-# Usage: python align.py <input_file_1> <input_file_2> <output_file>
+    Given two input files in fasta format, align each pair of sequences and output the alignments into a single file
 
-# Example: python align.py input1.fasta input2.fasta output.fasta
+    Usage: python align.py <input_file_1> <input_file_2> <output_file>
+    Example: python align.py input1.fasta input2.fasta output.fasta
 
-# Note: This script requires the Biopython module: http://biopython.org/wiki/Download
+    Note: This script requires the Biopython module: http://biopython.org/wiki/Download
+  """
 
 import sys
 
