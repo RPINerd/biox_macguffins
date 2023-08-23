@@ -58,14 +58,8 @@ def main(args):
     output_list = []
     for record in SeqIO.parse(args.input, "fasta"):
         accession = record.id
-        # print(record.description)
-        # print(f"Processing {accession}")
-        # print(f"ID: {record.id}")
         info = record.description
-        # print(f"Info: {info}")
 
-        # taxid, gi = accession_to_taxid(record[0], ref_dict)
-        # output_list.append([record[0], record[1], taxid, record[2]])
         c.execute("SELECT taxid, gi FROM data WHERE accession=?", (accession,))
         result = c.fetchone()
         if result is None:
