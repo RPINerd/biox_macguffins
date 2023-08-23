@@ -1,9 +1,10 @@
 """
-    Validate Bisulfite | RPINerd, 08/23/23
+    Primer SNP Validation | RPINerd, 08/23/23
 
-    Simple script to double-check all the primers desigend by the Bisulfite pipeline
-    and make sure none create tabix hits (i.e. contain an SNP with frequency > 0.01)
+    Simple script to double-check primers desigend by either the Bisulfite or Crispr
+    pipeline to make sure none create tabix hits (i.e. contain an SNP with frequency > 0.01)
 
+    Usage: python [assay file] [b/c]
 """
 
 import os
@@ -12,7 +13,6 @@ import sys
 from classes import Primer
 from internalconfigs import TABIX_PATH
 
-# TODO Merge this with crispr validate, basically identical!
 assayfile = open(sys.argv[1], "r")
 primers = []
 pnum = 1
@@ -26,13 +26,23 @@ for line in assayfile:
         firstline = False
         continue
 
-    if data[23].strip():
-        print("data23 " + data[23])
-        continue
+    # Bisulfite primers input
+    if sys.argv[2] == "b":
+        if data[23].strip():
+            print("data23 " + data[23])
+            continue
+        p = Primer(data[2], pnum, data[4], data[3])
+        primers.append(p)
+        pnum += 1
 
-    p = Primer(data[2], pnum, data[4], data[3])
-    primers.append(p)
+    # Crispr primers input
+    elif sys.argv[2] == "c":
+        fp = Primer(data[0], pnum, data[4], data[5])
+        rp = Primer(data[0], pnum, data[11], data[10])
+        primers.append(fp)
+        primers.append(rp)
     pnum += 1
+
 print(f"Input file parsed! Found {len(primers)} primers.")
 
 print(f"Using {TABIX_PATH} for index file.")
