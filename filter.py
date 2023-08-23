@@ -1,9 +1,18 @@
+"""
+    Base Content Filter | RPINerd, ??
+
+    Input is a tab separated list of sequences with base content metrics:
+    seq|?|gc-poly|a|t|c|g
+    With each entry done in percent values
+
+    Script will output a cleaned tsv file that removes all sequences not meeting 
+    desired thresholds
+"""
 
 file = open("base_content.tsv", "r")
 clean = open("seq_list_cleaned.tsv", "w")
 for line in file:
-
-    if line.startswith('#'):
+    if line.startswith("#"):
         continue
 
     cols = line.split()
@@ -23,8 +32,18 @@ for line in file:
 
     if gcp >= 75.00:
         continue
-    elif ( a >= 75.00 ) | (t >= 75.00) | (c >= 75.00) | (g >= 75.00) | \
-         (at >= 86.00) | (ac >= 86.00) | (ag >= 86.00) | (tc >= 86) | (tg >= 86) | (cg >= 86):
+    elif (
+        (a >= 75.00)
+        or (t >= 75.00)
+        or (c >= 75.00)
+        or (g >= 75.00)
+        or (at >= 86.00)
+        or (ac >= 86.00)
+        or (ag >= 86.00)
+        or (tc >= 86)
+        or (tg >= 86)
+        or (cg >= 86)
+    ):
         continue
     else:
         clean.write(line)

@@ -1,13 +1,13 @@
-import sys
-from Bio import SeqIO
-
-'''
-    fadiff.py
-    Chris Howard | 2021
+"""
+    Fasta Diff | RPINerd, 2021
 
     Tiny wrapper around SeqIO to generate the unique sequences from two fasta files
     Messy and slow..
-'''
+"""
+
+import sys
+
+from Bio import SeqIO
 
 curr_db = list(SeqIO.parse(sys.argv[1], "fasta"))
 new_db = list(SeqIO.parse(sys.argv[2], "fasta"))

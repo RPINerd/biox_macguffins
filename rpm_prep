@@ -1,9 +1,9 @@
 #!/bin/bash
 
-    # rpm_prep
-    # Chris Howard | 02/26/21
-    #
-    # When executed in a directory with R1 and R2.fastq.gz files, script will extract each one, use seqtk to subsample it and then once both files are sampled, join them into a report using the read_pair_merger.py script I wrote
+# rpm_prep
+# RPINerd, 02/26/21
+#
+# When executed in a directory with R1 and R2.fastq.gz files, script will extract each one, use seqtk to subsample it and then once both files are sampled, join them into a report using the read_pair_merger.py script I wrote
 
 # SeqTK Software for subsampling fastq files
 export PATH="$PATH:/home/choward/bin/source/SeqTK/"
@@ -17,7 +17,7 @@ else
 fi
 
 # Get list of all fastq files in current directory
-files=`ls ./*.fastq.gz`
+files=$(ls ./*.fastq.gz)
 read=1
 
 # TODO be able to distinguish separate samples within the same folder
@@ -26,7 +26,7 @@ for file in $files
         filename="$read.fastq"
 
         # Extract file
-        gzip -cdk $file > $filename
+        gzip -cdk "$file" > $filename
 
         # Subsample
         seqtk sample -s420 $filename 2500 > $filename.sub.fastq
@@ -34,4 +34,4 @@ for file in $files
         read=$((read+1))
     done
 
-python3 ~/bin/read_pair_merger.py 1.fastq.sub.fastq 2.fastq.sub.fastq $outfile.csv
+python3 ~/bin/read_pair_merger.py 1.fastq.sub.fastq 2.fastq.sub.fastq "$outfile".csv

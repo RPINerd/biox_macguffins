@@ -1,3 +1,13 @@
+"""
+    Consensus Generator | RPINerd, 08/14/23
+    
+    Very early pseudocode to take a user input of sequences and give back
+    a minimal list of consensus sequences that are base-complete (i.e. no 'N's or gaps)
+    and average out the conflicts between individuals in groups of similarity so that
+    when designing targeting sequences the base mismatches are minimized but evenly
+    distributed
+"""
+
 import sys
 from Bio import AlignIO
 from Bio import SeqIO

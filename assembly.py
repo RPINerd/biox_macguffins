@@ -29,8 +29,9 @@ print s.sequence
 
 from itertools import combinations
 
+
 class Read:
-    """ Class representing reads in the graph
+    """Class representing reads in the graph
 
     Parameters
     ----------
@@ -41,7 +42,7 @@ class Read:
     Attributes
     ----------
     overlaps : dict
-        The dictionary that holds information about reads that 
+        The dictionary that holds information about reads that
         can be glued to the current read on the right side.
         Key --- string representing the other read.
         Value --- number of characters the other read protrudes
@@ -66,7 +67,7 @@ class Read:
         Limit on the number of times this read can be visited
         during the graph traversal. It is possible by accidence
         to have several reads that are equal to each other,
-        but still have a unique way to glue them. The limit is the 
+        but still have a unique way to glue them. The limit is the
         number of reads equal to the current read, including itself.
     """
 
@@ -77,7 +78,7 @@ class Read:
 
 
 class SequenceAssembler:
-    """ Class for sequence assembler
+    """Class for sequence assembler
 
     Attributes
     ----------
@@ -88,7 +89,7 @@ class SequenceAssembler:
         Value --- object of Read class.
 
     path : list
-        The list that holds reads in the order they 
+        The list that holds reads in the order they
         should be glued into the origianl sequence.
 
     sequence : str
@@ -97,7 +98,7 @@ class SequenceAssembler:
 
     num_reads : int
         Total number of reads added to the graph.
-        
+
     """
 
     def __init__(self):
@@ -106,9 +107,8 @@ class SequenceAssembler:
         self.sequence = ""
         self.num_reads = 0
 
-
     def add_read(self, read):
-        """ Add read to the graph.
+        """Add read to the graph.
 
         If read is already in the dictinary of reads,
         increment its visit limit.
@@ -120,9 +120,8 @@ class SequenceAssembler:
             self.reads[read].visit_limit += 1
         self.num_reads += 1
 
-
     def read_fasta(self, handle):
-        """ Read fragments from input file handle.
+        """Read fragments from input file handle.
 
         For example,
 
@@ -141,10 +140,9 @@ class SequenceAssembler:
                 read += line.strip()
         self.add_read(read)
 
-
     def calculate_overlap(self, r1, r2):
-        """ Check if r1 and r2 can be glued.
-        
+        """Check if r1 and r2 can be glued.
+
         Calculate how much one of them protrudes
         with respect to another after they are glued.
         """
@@ -154,37 +152,35 @@ class SequenceAssembler:
         # Make sure one is not shorter than
         # the half of another.
 
-        if len(r1) / 2 + len(r1) % 2 <= len(r2) \
-        and len(r2) / 2 + len(r2) % 2 <= len(r1):
-
+        if len(r1) / 2 + len(r1) % 2 <= len(r2) and len(r2) / 2 + len(r2) % 2 <= len(r1):
             # prepare second halves for overlap pre-check
             r1half = int(len(r1) / 2)
             r2half = int(len(r2) / 2)
             tail1 = r1[r1half:]
             tail2 = r2[r2half:]
-    
+
             # case 1: r1 contains r2 completely
             #
             # For example,
             #
             # ATCGCCGGAT
             #  TCGCCGGA
-    
+
             pos = r1.find(r2)
             if pos != -1:
                 self.reads[r1].overlaps[r2] = pos + len(r2) - len(r1)
-    
+
             # case 2: r2 contains r1 completely
             #
             # For example,
             #
             #  TCGCCGGA
             # ATCGCCGGAT
-    
+
             pos = r2.find(r1)
             if pos != -1:
                 self.reads[r2].overlaps[r1] = pos + len(r1) - len(r2)
-    
+
             # case 3: end of r1 overlaps with beginning of r2
             #
             # For example,
@@ -193,16 +189,15 @@ class SequenceAssembler:
             #  TCGCCGGATGC
             #
             # First check that at least half of r1 is in r2
-            # If there is a match, calculate the expected length 
+            # If there is a match, calculate the expected length
             # of overlap and check if they indeed overlap.
 
-    
             pos = r2.find(tail1)
             if pos != -1:
                 overlap = pos + len(tail1)
                 if r1[-overlap:] == r2[:overlap]:
                     self.reads[r1].overlaps[r2] = len(r2) - overlap
-                    
+
             # case 4: end of r2 overlaps with beginning of r1
             #
             # For example,
@@ -211,18 +206,17 @@ class SequenceAssembler:
             #  TCGCCGGAT
             #
             # First check that at least half of r2 is in r1
-            # If there is a match, calculate the expected length 
+            # If there is a match, calculate the expected length
             # of overlap and check if they indeed overlap.
-    
+
             pos = r1.find(tail2)
-            if pos != -1: 
+            if pos != -1:
                 overlap = pos + len(tail2)
                 if r2[-overlap:] == r1[:overlap]:
                     self.reads[r2].overlaps[r1] = len(r1) - overlap
 
-
     def find_path(self, num_visited, read):
-        """ Implements the DFS algorithm.
+        """Implements the DFS algorithm.
 
         For each visited read, we check what reads can be visited next
         and visit one of them. If at some point we are at a dead end,
@@ -245,9 +239,8 @@ class SequenceAssembler:
             finished = True
         return finished
 
-
     def assemble(self):
-        """ Assemble the original sequence.
+        """Assemble the original sequence.
 
         After building the graph (reading all reads)
         calculate all overlaps run the DFS algorithm.
@@ -284,7 +277,6 @@ class SequenceAssembler:
                     self.find_path(1, read)
                     break
         else:
-
             # If there no good candidates where to start
             # the DFS algorithm, try each node.
 
@@ -302,11 +294,10 @@ class SequenceAssembler:
         self.sequence = self.path[0]
 
         if len(self.path) > 1:
-            for i in range(len(self.path)-1):
+            for i in range(len(self.path) - 1):
                 r = self.reads[self.path[i]]
-                overlap = r.overlaps[self.path[i+1]]
+                overlap = r.overlaps[self.path[i + 1]]
                 if overlap > 0:
-                    self.sequence += self.path[i+1][-overlap:]
+                    self.sequence += self.path[i + 1][-overlap:]
                 elif overlap < 0:
                     self.sequence = self.sequence[:overlap]
-

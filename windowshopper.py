@@ -1,22 +1,20 @@
+"""
+    Window Shopper | RPINerd, 06/14/23
+
+    Given a fasta file, step through all the sequences and break down each one into a collection of X-base windows.
+"""
+
 import argparse
+
 from Bio import SeqIO
 
 import assembly
 
-'''
-    windowshopper.py
-    Chris Howard | 06/14/23
-    
-    Given a fasta file, step through all the sequences and break down each one into a collection of X-base windows.
-'''
-
 
 def main(args) -> None:
-    
     window_size = int(args.window)
     window_dict = {}
     for record in SeqIO.parse(args.fasta, "fasta"):
-
         seq = record.seq
         step = int(args.step)
         start = 0
@@ -45,7 +43,6 @@ def main(args) -> None:
 
 
 if __name__ == "__main__":
-
     # Argument parsing
     parser = argparse.ArgumentParser(description="")
     parser.add_argument("-f", "--fasta", help="Input fasta file", required=True)
@@ -57,7 +54,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.assembly:
-        
         s = assembly.SequenceAssembler()
 
         # read data

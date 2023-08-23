@@ -11,6 +11,7 @@ import sqlite3
 
 
 def main(args):
+    # TODO handle multiple input files each as a table
     # Set up the database
     conn = sqlite3.connect(args.output)
     c = conn.cursor()
@@ -54,12 +55,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="")
     parser.add_argument("-i", "--input", help="Input file", required=True)
     parser.add_argument("-o", "--output", help="Output database file", required=True)
-    parser.add_argument(
-        "-v", "--verbose", help="Lots of status messages", action="store_true"
-    )
-    parser.add_argument(
-        "-t", "--tab", help="Input file is tab-delimited", action="store_true"
-    )
+    parser.add_argument("-v", "--verbose", help="Lots of status messages", action="store_true")
+    parser.add_argument("-t", "--tab", help="Input file is tab-delimited", action="store_true")
     args = parser.parse_args()
 
     # Set up logging

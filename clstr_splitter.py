@@ -1,12 +1,11 @@
+"""
+    cd-hit Cluster Splitter | RPINerd, 2021
+
+    A cleanup script to break down output from cd-hit program
+"""
+
 import re
 import sys
-
-'''
-    clstr_splitter
-    Chris Howard | 2021
-    
-    A cleanup script to break down output from cd-hit program
-'''
 
 clstr_file = open(sys.argv[0])
 cur_clst = ""
@@ -20,15 +19,13 @@ for line in clstr_file:
         continue
 
     if line.startswith(">"):
-
         cur_clst = line.strip(">")
         clusters[cur_clst] = []
 
     else:
         reg = r">(chr.+:[0-9]+-[0-9]+)\.\."
         clusters[cur_clst].append(re.search(reg, line).group(1))
-    
-    
+
 
 print("Size of clusters: " + str(len(clusters)) + "\n")
 
@@ -36,7 +33,6 @@ triples = []
 remainder = []
 
 for key in clusters:
-
     if len(clusters[key]) == 3:
         triples.extend(clusters[key])
     elif len(clusters[key]) <= 2:

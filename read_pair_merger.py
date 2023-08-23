@@ -1,5 +1,6 @@
-import sys
 import re
+import sys
+
 from Bio import SeqIO
 
 r1_file = sys.argv[1]
@@ -24,12 +25,10 @@ for record in SeqIO.parse(r2_file, "fastq"):
 
 r1_count = len(reads_1)
 r2_count = len(reads_2)
-if (r1_count != r2_count):
-
+if r1_count != r2_count:
     print("Unequal count! Perhaps you mismatched R1/R2 files?")
 
 else:
-
     # Open ouput csv for report
     out_file = open(result_file, "w")
 
@@ -37,7 +36,6 @@ else:
     polyT_percent = (t_run / r2_count) * 100
     out_file.write(f"Read 1,Read 2,%R2 >= 20T : {polyT_percent}\n")
     for r in range(r1_count):
-
         out_file.write(f"{reads_1[r]},{reads_2[r]}\n")
 
         r += 1

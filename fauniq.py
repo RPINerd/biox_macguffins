@@ -1,12 +1,12 @@
-import sys
-from Bio import SeqIO
-
-'''
-    fauniq.py
-    Chris Howard | 2021
+"""
+    Fasta Unique | RPINerd, 2021
 
     Tiny wrapper around SeqIO to generate the unique sequences from a single fasta file
-'''
+"""
+
+import sys
+
+from Bio import SeqIO
 
 new_db = list(SeqIO.parse(sys.argv[1], "fasta"))
 
