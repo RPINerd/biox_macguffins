@@ -1,5 +1,5 @@
 """
-    Accession to TaxID Mapping | RPINerd, 08/22/23
+    Accession to TaxID Mapping | RPINerd, 08/29/23
 
     Given a fasta input file and reference database, create a tsv output that maps the accession numbers to a taxid
 
@@ -18,38 +18,7 @@ import sqlite3
 from Bio import SeqIO
 
 
-def indexing(ref_path) -> dict:
-    # Create a dictionary of the reference sequences
-    ref_dict = {}
-    priority_order = ["nucl_gb", "nucl_wgs", "nucl_wgs_extra", "dead_nucl", "dead_wgs"]
-    for reference in priority_order:
-        with open(ref_path + reference + ".a2t", "r") as ref_file:
-            for record in ref_file:
-                records = record.strip().split("\t")
-                accession = records[1]
-                taxid = records[2]
-                gi = records[3]
-                # If the accession number is already in the dictionary, skip it
-                # This enforces the priority by saving the first unique accession number it finds
-                if accession not in ref_dict:
-                    ref_dict[accession] = [taxid, gi]
-
-    return ref_dict
-
-
-def accession_to_taxid(accession, ref_dict) -> str:
-    # If the accession number is in the reference dictionary, return the taxid and gi
-    if accession in ref_dict:
-        return ref_dict[accession][0], ref_dict[accession][1]
-    # If the accession number is not in the reference dictionary, return "NA"
-    else:
-        return "NA"
-
-
 def main(args):
-    # Create a dictionary of the reference sequences
-    # ref_dict = indexing(args.reference)
-
     # Create a connection to the provided database
     conn = sqlite3.connect(args.reference)
     c = conn.cursor()
