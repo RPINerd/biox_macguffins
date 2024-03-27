@@ -1,12 +1,8 @@
 """
-    Simple Utilities | RPINerd, 03/11/24
+    Simple Utilities | RPINerd, 03/20/24
 
     Collection of very basic utilities for use in other scripts.
 """
-
-import argparse
-import os
-import sys
 
 
 def contains_n_consecutive(n, lst, sort=False):
