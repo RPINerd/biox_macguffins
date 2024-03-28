@@ -17,8 +17,4 @@ tmp/
 *.txt
 
 # Internal only
-internalconfigs.py
-select_probes.py
-webserver_primer_pull.py
-phased.py
-primer_format.py
+internal/
