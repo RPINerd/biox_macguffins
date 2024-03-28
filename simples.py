@@ -130,3 +130,22 @@ def complement(seq) -> str:
     """
 
     return seq.translate(str.maketrans("ATCGatcg", "TAGCtagc"))
+
+
+def look_forward(iterable, start: int, char: str) -> int:
+    """
+    Look ahead in an iterable for the next point where a character is different
+
+    :param iterable: iterable: A list/tuple to look forward through
+    :param int: start: The initial index to being from
+    :param str: char: The character to look for the end of in the sequence
+    """
+
+    idx = start
+    end_idx = None
+    while not end_idx and idx < len(iterable):
+        idx += 1
+        if iterable[idx] != char:
+            end_idx = idx
+
+    return end_idx
