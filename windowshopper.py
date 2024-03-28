@@ -23,7 +23,7 @@ def main(args) -> None:
             window = seq[start:end]
             try:
                 window_dict[window] += 1
-            except:
+            except KeyError:
                 window_dict[window] = 1
             start += step
 
