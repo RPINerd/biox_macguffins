@@ -69,10 +69,20 @@ def parse_args() -> argparse.ArgumentParser:
         default=100,
         required=False,
     )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=str,
+        help="Output directory for expansion fasta files (Defaults to current directory)",
+        default="./",
+        required=False
+    )
     args = parser.parse_args()
     return args
 
 
+# TODO make sure there is more than 1 sequence
+# TODO input must be an alignment, i.e. have '-' characters
 def validate_falign(file) -> str:
     """
     Validate the input fasta alignment file
@@ -82,9 +92,6 @@ def validate_falign(file) -> str:
     """
 
     message = ""
-
-    # TODO make sure there is more than 1 sequence
-    # TODO input must be an alignment, i.e. have '-' characters
 
     return message
 
@@ -121,6 +128,8 @@ def parse_refseq(ref_seq: tuple[str]) -> list[tuple[int, int]]:
     :rtype: list[tuple[int, int]] - List of tuples containing the start and end of missing regions
     """
 
+    # TODO what if we walk through in steps of REGION_SIZE, since we know that anything contained within that scope would be too small to qualify anyways, then look_backward to find the start and look_forward for the end when landing on a gap
+
     # Unpack refseq and set up some variables
     sequence = ref_seq
     gaps = []
@@ -145,6 +154,7 @@ def parse_refseq(ref_seq: tuple[str]) -> list[tuple[int, int]]:
             minpos = idx + REGION_SIZE - 1
             # -print(f"minpos: {minpos}")
             # -print(f"subseq: {sequence[idx:minpos]}")
+            # TODO could just infer size validity from the look_forward number, reduce duplicate lookup
             if not all(nt == "-" for nt in sequence[idx:minpos]):
                 continue
 
@@ -163,7 +173,10 @@ def parse_refseq(ref_seq: tuple[str]) -> list[tuple[int, int]]:
     return gaps
 
 
-def main(fasta_file) -> None:
+def main(args) -> None:
+
+    fasta_file = args.fasta
+    output_directory = args.output
 
     # TODO validate fasta file instead of assuming input
     invalid = validate_falign(fasta_file)
@@ -178,9 +191,63 @@ def main(fasta_file) -> None:
     missing_regions = parse_refseq(ref_seq)
 
     #! Debug
-    print(missing_regions)
+    print(f" Missing regions: {missing_regions}")
 
     # Process the other sequences to extract the missing regions
+    algo = 2
+    # - Option 1
+    """
+        for each missing region,
+            get the midpoint index and
+            for each other sequences in tracks
+                check to see if it is a valid base or a gap (i.e. "-")
+
+    """
+    if algo == 1:
+        for region in missing_regions:
+            start, end = region
+            midpoint = (start + end) // 2
+
+            #! Debug
+            print(midpoint)
+
+            for id, seq in tracks.items():
+                if seq[midpoint] != "-":
+                    #! Debug
+                    print(id, seq[midpoint])
+
+    # - Option 2
+    """
+        for each missing region
+            check that all positions of tracks[id] are not "-" within the region
+    """
+    if algo == 2:
+        fasta_number = 1
+        for region in missing_regions:
+            start, end = region
+            start_upstream = start - UPSTREAM_ANCHOR
+            end_downstream = end + DOWNSTREAM_ANCHOR
+
+            for id, seq in tracks.items():
+                if all(nt != "-" for nt in seq[start:end]):
+                    # TODO figure out how to best name these subsequences
+
+                    #! Debug
+                    print(f"Filler from: {id.strip()} with seq {"".join(seq[start:end])}")
+
+                    # TODO try except for when the downstream/upstream are outside of the range, default to just the start or end
+                    fasta_header = f">ExpansionSEQ {fasta_number}"
+                    fasta_seq = "".join(seq[start_upstream:end_downstream])
+
+                    #! Debug
+                    print(f"Seq including anchors:\n{fasta_seq}")
+
+                    with open(f"{output_directory}expansion{fasta_number}.fasta", "x") as expansion_file:
+                        expansion_file.write(fasta_header + "\n")
+                        expansion_file.write(fasta_seq)
+
+                    fasta_number += 1
+                    break
 
     return
 
@@ -193,4 +260,4 @@ if __name__ == "__main__":
     UPSTREAM_ANCHOR = args.upstream
     DOWNSTREAM_ANCHOR = args.downstream
 
-    main(args.fasta)
+    main(args)
