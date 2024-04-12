@@ -149,3 +149,22 @@ def look_forward(iterable, start: int, char: str) -> int:
             end_idx = idx
 
     return end_idx
+
+
+def look_backward(iterable, start: int, char: str) -> int:
+    """
+    Look behind in an iterable for the next point where a character is different
+
+    :param iterable: iterable: A list/tuple to look backward through
+    :param int: start: The initial index to being from
+    :param str: char: The character to look for the end of in the sequence
+    """
+
+    idx = start
+    end_idx = None
+    while not end_idx and idx > 0:
+        idx -= 1
+        if iterable[idx] != char:
+            end_idx = idx
+
+    return end_idx
