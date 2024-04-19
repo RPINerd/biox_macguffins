@@ -27,7 +27,7 @@ import argparse
 import os
 import sys
 
-from simples import look_forward
+from simples import look_backward, look_forward
 
 # Minimum gap size in refseq to consider filling
 REGION_SIZE = 150
@@ -128,8 +128,6 @@ def parse_refseq(ref_seq: tuple[str]) -> list[tuple[int, int]]:
     :rtype: list[tuple[int, int]] - List of tuples containing the start and end of missing regions
     """
 
-    # TODO what if we walk through in steps of REGION_SIZE, since we know that anything contained within that scope would be too small to qualify anyways, then look_backward to find the start and look_forward for the end when landing on a gap
-
     # Unpack refseq and set up some variables
     sequence = ref_seq
     gaps = []
@@ -141,31 +139,20 @@ def parse_refseq(ref_seq: tuple[str]) -> list[tuple[int, int]]:
     idx = 0
     while idx < nt_total:
 
-        # -print(idx, sequence[idx])
-
         if sequence[idx] != "-":  # Nothing to see here
-            idx += 1
+            idx += REGION_SIZE - 1
 
         # A gap base is found at the current index
         else:
 
-            # -print("gap base")
+            # Find the start and end of the gap
+            gap_start = look_backward(sequence, idx, "-")
+            gap_end = look_forward(sequence, idx, "-")
+            
             # Verify gap length is valid
-            minpos = idx + REGION_SIZE - 1
-            # -print(f"minpos: {minpos}")
-            # -print(f"subseq: {sequence[idx:minpos]}")
-            # TODO could just infer size validity from the look_forward number, reduce duplicate lookup
-            if not all(nt == "-" for nt in sequence[idx:minpos]):
-                continue
-
-            gap_start = idx
-            # -print(f"start: {idx}, {sequence[idx]}")
-
-            # Look forward until the next non-gap base is found
-            gap_end = look_forward(sequence, minpos, "-")
-
-            # Add this gap to the list
-            gaps.append((gap_start, gap_end))
+            gap_len = gap_end - gap_start
+            if gap_len >= REGION_SIZE:
+                gaps.append((gap_start, gap_end))
 
             # Advance the index to the next base of the seq following the gap
             idx = gap_end + 1
