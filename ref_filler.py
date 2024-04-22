@@ -181,60 +181,32 @@ def main(args) -> None:
     print(f" Missing regions: {missing_regions}")
 
     # Process the other sequences to extract the missing regions
-    algo = 2
-    # - Option 1
-    """
-        for each missing region,
-            get the midpoint index and
-            for each other sequences in tracks
-                check to see if it is a valid base or a gap (i.e. "-")
+    fasta_number = 1
+    for region in missing_regions:
+        start, end = region
+        start_upstream = start - UPSTREAM_ANCHOR
+        end_downstream = end + DOWNSTREAM_ANCHOR
 
-    """
-    if algo == 1:
-        for region in missing_regions:
-            start, end = region
-            midpoint = (start + end) // 2
+        for id, seq in tracks.items():
+            if all(nt != "-" for nt in seq[start:end]):
+                # TODO figure out how to best name these subsequences
 
-            #! Debug
-            print(midpoint)
+                #! Debug
+                print(f"Filler from: {id.strip()} with seq {"".join(seq[start:end])}")
 
-            for id, seq in tracks.items():
-                if seq[midpoint] != "-":
-                    #! Debug
-                    print(id, seq[midpoint])
+                # TODO try except for when the downstream/upstream are outside of the range, default to just the start or end
+                fasta_header = f">ExpansionSEQ {fasta_number}"
+                fasta_seq = "".join(seq[start_upstream:end_downstream])
 
-    # - Option 2
-    """
-        for each missing region
-            check that all positions of tracks[id] are not "-" within the region
-    """
-    if algo == 2:
-        fasta_number = 1
-        for region in missing_regions:
-            start, end = region
-            start_upstream = start - UPSTREAM_ANCHOR
-            end_downstream = end + DOWNSTREAM_ANCHOR
+                #! Debug
+                print(f"Seq including anchors:\n{fasta_seq}")
 
-            for id, seq in tracks.items():
-                if all(nt != "-" for nt in seq[start:end]):
-                    # TODO figure out how to best name these subsequences
+                with open(f"{output_directory}expansion{fasta_number}.fasta", "x") as expansion_file:
+                    expansion_file.write(fasta_header + "\n")
+                    expansion_file.write(fasta_seq)
 
-                    #! Debug
-                    print(f"Filler from: {id.strip()} with seq {"".join(seq[start:end])}")
-
-                    # TODO try except for when the downstream/upstream are outside of the range, default to just the start or end
-                    fasta_header = f">ExpansionSEQ {fasta_number}"
-                    fasta_seq = "".join(seq[start_upstream:end_downstream])
-
-                    #! Debug
-                    print(f"Seq including anchors:\n{fasta_seq}")
-
-                    with open(f"{output_directory}expansion{fasta_number}.fasta", "x") as expansion_file:
-                        expansion_file.write(fasta_header + "\n")
-                        expansion_file.write(fasta_seq)
-
-                    fasta_number += 1
-                    break
+                fasta_number += 1
+                break
 
     return
 
