@@ -27,7 +27,8 @@ import argparse
 import os
 import sys
 
-from simples import look_backward, look_forward
+from simples import (look_backward_match, look_backward_miss,
+                     look_forward_match, look_forward_miss)
 
 # Minimum gap size in refseq to consider filling
 REGION_SIZE = 150
@@ -146,8 +147,8 @@ def parse_refseq(ref_seq: tuple[str]) -> list[tuple[int, int]]:
         else:
 
             # Find the start and end of the gap
-            gap_start = look_backward(sequence, idx, "-")
-            gap_end = look_forward(sequence, idx, "-")
+            gap_start = look_backward_miss(sequence, idx, "-") + 1
+            gap_end = look_forward_miss(sequence, idx, "-") - 1
             
             # Verify gap length is valid
             gap_len = gap_end - gap_start
@@ -160,11 +161,79 @@ def parse_refseq(ref_seq: tuple[str]) -> list[tuple[int, int]]:
     return gaps
 
 
+def truncate_gaps(seq: tuple[str]) -> tuple[str]:
+    """
+    Truncate a given sequence to remove all gaps from both ends. 
+
+    Such that:
+    ATG-TTACTA-GTAGATAGCTGTCGTAGCGATGCAGTCGGCG-GCGAT-GGA--GATGCGA
+    Would become:
+    GTAGATAGCTGTCGTAGCGATGCAGTCGGCG
+
+    :param tuple[str]: seq: Sequence to truncate
+    :rtype: str - Truncated sequence
+    """
+
+    # Look backwards from the point where the upstream anchor joins to find the first gap
+    upstream_first_gap = look_backward_match(seq, UPSTREAM_ANCHOR, "-") + 1
+
+    # Look forward from the point where the downstream anchor joins to find the first gap
+    downstream_first_gap = look_forward_match(seq, len(seq) - DOWNSTREAM_ANCHOR, "-") - 1
+
+    #! Debug
+    print(f"Upstream gap: {upstream_first_gap}, Downstream gap: {downstream_first_gap}")
+    print("".join(seq[upstream_first_gap:downstream_first_gap]))
+
+    return "".join(seq[upstream_first_gap:downstream_first_gap])
+
+
+def generate_patch(tracks: dict[str, tuple[str]], start: int, end: int, output_dir: str, fasta_number: int) -> bool:
+
+    start_upstream = start - UPSTREAM_ANCHOR
+    end_downstream = end + DOWNSTREAM_ANCHOR
+
+    for id, seq in tracks.items():
+        if all(nt != "-" for nt in seq[start:end]):
+
+            # TODO figure out how to best name these subsequences
+            # Generate a fasta entry for the expansion
+            fasta_header = f">ExpansionSEQ {fasta_number}"
+
+            # TODO try except for when the downstream/upstream are outside of the range, default to just the start or end
+
+            #! Debug
+            print(f"Filler from: {id.strip()} with seq {"".join(seq[start:end])}")
+
+            # If gaps are present in the upstream or downstream regions, truncate the sequence
+            upstream_gaps = any(nt == "-" for nt in seq[start_upstream:start])
+            downstream_gaps = any(nt == "-" for nt in seq[end:end_downstream])
+            if upstream_gaps or downstream_gaps:
+                print("Truncating gaps")
+                fasta_seq = truncate_gaps(seq[start_upstream:end_downstream])
+            else:
+                fasta_seq = "".join(seq[start_upstream:end_downstream])
+
+            #! Debug
+            print(f"Seq including anchors:\n{fasta_seq}")
+
+            # Write the fasta entry to a file, if the file already exists, overwrite it
+            with open(os.path.join(output_dir, f"Expansion_{fasta_number}.fasta"), "w") as patch:
+                patch.write(f"{fasta_header}\n{fasta_seq}\n")
+
+            return True
+    
+    return False
+
+
 def main(args) -> None:
 
     fasta_file = args.fasta
     output_directory = args.output
 
+    # Verify that the output directory exists, create it if it does not
+    if not os.path.exists(output_directory):
+        os.makedirs(output_directory)
+        
     # TODO validate fasta file instead of assuming input
     invalid = validate_falign(fasta_file)
     if invalid:
@@ -184,29 +253,8 @@ def main(args) -> None:
     fasta_number = 1
     for region in missing_regions:
         start, end = region
-        start_upstream = start - UPSTREAM_ANCHOR
-        end_downstream = end + DOWNSTREAM_ANCHOR
-
-        for id, seq in tracks.items():
-            if all(nt != "-" for nt in seq[start:end]):
-                # TODO figure out how to best name these subsequences
-
-                #! Debug
-                print(f"Filler from: {id.strip()} with seq {"".join(seq[start:end])}")
-
-                # TODO try except for when the downstream/upstream are outside of the range, default to just the start or end
-                fasta_header = f">ExpansionSEQ {fasta_number}"
-                fasta_seq = "".join(seq[start_upstream:end_downstream])
-
-                #! Debug
-                print(f"Seq including anchors:\n{fasta_seq}")
-
-                with open(f"{output_directory}expansion{fasta_number}.fasta", "x") as expansion_file:
-                    expansion_file.write(fasta_header + "\n")
-                    expansion_file.write(fasta_seq)
-
-                fasta_number += 1
-                break
+        if generate_patch(tracks, start, end, output_directory, fasta_number):
+            fasta_number += 1
 
     return
 
