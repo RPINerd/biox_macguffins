@@ -132,7 +132,26 @@ def complement(seq) -> str:
     return seq.translate(str.maketrans("ATCGatcg", "TAGCtagc"))
 
 
-def look_forward(iterable, start: int, char: str) -> int:
+def look_forward_match(iterable, start: int, char: str) -> int:
+    """
+    Look ahead in an iterable for the next point where a character is the same
+
+    :param iterable: iterable: A list/tuple to look forward through
+    :param int: start: The initial index to being from
+    :param str: char: The character to look for the end of in the sequence
+    """
+
+    idx = start
+    end_idx = None
+    while not end_idx and idx < len(iterable):
+        idx += 1
+        if iterable[idx] == char:
+            end_idx = idx
+
+    return end_idx
+
+
+def look_forward_miss(iterable, start: int, char: str) -> int:
     """
     Look ahead in an iterable for the next point where a character is different
 
@@ -151,7 +170,26 @@ def look_forward(iterable, start: int, char: str) -> int:
     return end_idx
 
 
-def look_backward(iterable, start: int, char: str) -> int:
+def look_backward_match(iterable, start: int, char: str) -> int:
+    """
+    Look behind in an iterable for the next point where a character is the same
+
+    :param iterable: iterable: A list/tuple to look backward through
+    :param int: start: The initial index to being from
+    :param str: char: The character to look for the end of in the sequence
+    """
+
+    idx = start
+    end_idx = None
+    while not end_idx and idx > 0:
+        idx -= 1
+        if iterable[idx] == char:
+            end_idx = idx
+
+    return end_idx
+
+
+def look_backward_miss(iterable, start: int, char: str) -> int:
     """
     Look behind in an iterable for the next point where a character is different
 
