@@ -161,36 +161,12 @@ def parse_refseq(ref_seq: tuple[str]) -> list[tuple[int, int]]:
     return gaps
 
 
-def truncate_gaps(seq: tuple[str]) -> tuple[str]:
-    """
-    Truncate a given sequence to remove all gaps from both ends. 
-
-    Such that:
-    ATG-TTACTA-GTAGATAGCTGTCGTAGCGATGCAGTCGGCG-GCGAT-GGA--GATGCGA
-    Would become:
-    GTAGATAGCTGTCGTAGCGATGCAGTCGGCG
-
-    :param tuple[str]: seq: Sequence to truncate
-    :rtype: str - Truncated sequence
-    """
-
-    # Look backwards from the point where the upstream anchor joins to find the first gap
-    upstream_first_gap = look_backward_match(seq, UPSTREAM_ANCHOR, "-") + 1
-
-    # Look forward from the point where the downstream anchor joins to find the first gap
-    downstream_first_gap = look_forward_match(seq, len(seq) - DOWNSTREAM_ANCHOR, "-") - 1
-
-    #! Debug
-    print(f"Upstream gap: {upstream_first_gap}, Downstream gap: {downstream_first_gap}")
-    print("".join(seq[upstream_first_gap:downstream_first_gap]))
-
-    return "".join(seq[upstream_first_gap:downstream_first_gap])
-
-
 def generate_patch(tracks: dict[str, tuple[str]], start: int, end: int, output_dir: str, fasta_number: int) -> bool:
 
-    start_upstream = start - UPSTREAM_ANCHOR
-    end_downstream = end + DOWNSTREAM_ANCHOR
+    upstream_end = start - 1
+    upstream_start = upstream_end - UPSTREAM_ANCHOR
+    downstream_start = end + 1
+    downstream_end = downstream_start + DOWNSTREAM_ANCHOR
 
     for id, seq in tracks.items():
         if all(nt != "-" for nt in seq[start:end]):
@@ -199,22 +175,32 @@ def generate_patch(tracks: dict[str, tuple[str]], start: int, end: int, output_d
             # Generate a fasta entry for the expansion
             fasta_header = f">ExpansionSEQ {fasta_number}"
 
+            filler_seq = "".join(seq[start:end])
+            #! Debug
+            print(f"Filler from: {id.strip()} with seq {filler_seq}")
+            
             # TODO try except for when the downstream/upstream are outside of the range, default to just the start or end
+            upstream_seq = "".join(seq[upstream_start:upstream_end])
+            downstream_seq = "".join(seq[downstream_start:downstream_end])
 
             #! Debug
-            print(f"Filler from: {id.strip()} with seq {"".join(seq[start:end])}")
+            print(f"Upstream Anchor: {upstream_seq}")
+            print(f"Downstream Anchor: {downstream_seq}")
+            print(f"Anchored Seq: {"|".join([upstream_seq, filler_seq, downstream_seq])}")
 
             # If gaps are present in the upstream or downstream regions, truncate the sequence
-            upstream_gaps = any(nt == "-" for nt in seq[start_upstream:start])
-            downstream_gaps = any(nt == "-" for nt in seq[end:end_downstream])
-            if upstream_gaps or downstream_gaps:
-                print("Truncating gaps")
-                fasta_seq = truncate_gaps(seq[start_upstream:end_downstream])
-            else:
-                fasta_seq = "".join(seq[start_upstream:end_downstream])
+            if "-" in upstream_seq:
+                upstream_cut_point = look_backward_match(upstream_seq, len(upstream_seq) - 1, "-")
+                upstream_seq = upstream_seq[upstream_cut_point:]
+            if "-" in downstream_seq:
+                downstream_cut_point = look_forward_match(downstream_seq, 0, "-") + 1
+                downstream_seq = downstream_seq[:downstream_cut_point]
 
             #! Debug
-            print(f"Seq including anchors:\n{fasta_seq}")
+            print(f"Truncated Anchors: {"|".join([upstream_seq, filler_seq, downstream_seq])}")
+            
+            # Extract the sequence to be written to the fasta file
+            fasta_seq = "".join([upstream_seq, filler_seq, downstream_seq])
 
             # Write the fasta entry to a file, if the file already exists, overwrite it
             with open(os.path.join(output_dir, f"Expansion_{fasta_number}.fasta"), "w") as patch:

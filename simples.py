@@ -146,9 +146,12 @@ def look_forward_match(iterable, start: int, char: str) -> int:
     while not end_idx and idx < len(iterable):
         idx += 1
         if iterable[idx] == char:
-            end_idx = idx
+            end_idx = idx - 1
+            return end_idx
 
-    return end_idx
+    raise ValueError(
+        f"No match found looking forwards from index {start} along interable:\n{iterable[start:len(iterable)]}"
+    )
 
 
 def look_forward_miss(iterable, start: int, char: str) -> int:
@@ -182,11 +185,14 @@ def look_backward_match(iterable, start: int, char: str) -> int:
     idx = start
     end_idx = None
     while not end_idx and idx > 0:
+        # print(idx)
+        # print(iterable[idx])
         idx -= 1
         if iterable[idx] == char:
-            end_idx = idx
+            end_idx = idx + 1
+            return end_idx
 
-    return end_idx
+    raise ValueError(f"No match found looking backwards from index {start} along interable:\n{iterable}")
 
 
 def look_backward_miss(iterable, start: int, char: str) -> int:
