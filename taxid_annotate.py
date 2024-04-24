@@ -37,7 +37,7 @@ def main(reference, panel_components):
 
     # Next step through the panel components file and search for matches in the ref_records
     # If a match is found, write the record to a new file
-    with open(panel_components, "r") as panel, open("panel_annotations.tsv", "a") as output:
+    with open(panel_components, "r") as panel, open("target_annotations.tsv", "a") as output:
         for line in panel:
             line = line.strip().split("\t")
             component = line[0]

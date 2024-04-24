@@ -25,7 +25,6 @@
 
 import argparse
 import os
-import sys
 
 from simples import (look_backward_match, look_backward_miss,
                      look_forward_match, look_forward_miss)
@@ -149,7 +148,7 @@ def parse_refseq(ref_seq: tuple[str]) -> list[tuple[int, int]]:
             # Find the start and end of the gap
             gap_start = look_backward_miss(sequence, idx, "-") + 1
             gap_end = look_forward_miss(sequence, idx, "-") - 1
-            
+
             # Verify gap length is valid
             gap_len = gap_end - gap_start
             if gap_len >= REGION_SIZE:
@@ -178,8 +177,8 @@ def generate_patch(tracks: dict[str, tuple[str]], start: int, end: int, output_d
             filler_seq = "".join(seq[start:end])
             #! Debug
             print(f"Filler from: {id.strip()} with seq {filler_seq}")
-            
-            # TODO try except for when the downstream/upstream are outside of the range, default to just the start or end
+
+            # TODO account for when the downstream/upstream are outside of the range, default to just the start or end
             upstream_seq = "".join(seq[upstream_start:upstream_end])
             downstream_seq = "".join(seq[downstream_start:downstream_end])
 
@@ -198,7 +197,7 @@ def generate_patch(tracks: dict[str, tuple[str]], start: int, end: int, output_d
 
             #! Debug
             print(f"Truncated Anchors: {"|".join([upstream_seq, filler_seq, downstream_seq])}")
-            
+
             # Extract the sequence to be written to the fasta file
             fasta_seq = "".join([upstream_seq, filler_seq, downstream_seq])
 
@@ -207,7 +206,7 @@ def generate_patch(tracks: dict[str, tuple[str]], start: int, end: int, output_d
                 patch.write(f"{fasta_header}\n{fasta_seq}\n")
 
             return True
-    
+
     return False
 
 
@@ -219,7 +218,7 @@ def main(args) -> None:
     # Verify that the output directory exists, create it if it does not
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
-        
+
     # TODO validate fasta file instead of assuming input
     invalid = validate_falign(fasta_file)
     if invalid:
