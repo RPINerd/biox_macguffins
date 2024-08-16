@@ -11,7 +11,6 @@
       dead_wgs
 """
 
-
 import argparse
 import sqlite3
 

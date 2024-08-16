@@ -26,8 +26,8 @@
 import argparse
 import os
 
-from simples import (look_backward_match, look_backward_miss,
-                     look_forward_match, look_forward_miss)
+from simples import (look_backward_match, look_backward_mismatch,
+                     look_forward_match, look_forward_mismatch)
 
 # Minimum gap size in refseq to consider filling
 REGION_SIZE = 150
@@ -116,6 +116,9 @@ def parse_fasta(file: str) -> dict[str, tuple[str]]:
                 ref = False
             else:
                 tracks[id] = tuple(seq)
+                #! Debug - create a file to add all the insertions associated with the ID to in alignment format
+                # with open(f"{id.strip('>').strip()}_insertions.fasta", "w") as insertions:
+                #     insertions.write(f"{id.strip()}\n{seq}")
 
     return tracks
 
@@ -134,8 +137,7 @@ def parse_refseq(ref_seq: tuple[str]) -> list[tuple[int, int]]:
     gap_start = None
     gap_end = None
     nt_total = len(sequence)
-
-    # -print(id, sequence)
+    
     idx = 0
     while idx < nt_total:
 
@@ -146,8 +148,8 @@ def parse_refseq(ref_seq: tuple[str]) -> list[tuple[int, int]]:
         else:
 
             # Find the start and end of the gap
-            gap_start = look_backward_miss(sequence, idx, "-") + 1
-            gap_end = look_forward_miss(sequence, idx, "-") - 1
+            gap_start = look_backward_mismatch(sequence, idx, "-") + 1
+            gap_end = look_forward_mismatch(sequence, idx, "-") - 1
 
             # Verify gap length is valid
             gap_len = gap_end - gap_start
@@ -170,22 +172,19 @@ def generate_patch(tracks: dict[str, tuple[str]], start: int, end: int, output_d
     for id, seq in tracks.items():
         if all(nt != "-" for nt in seq[start:end]):
 
-            # TODO figure out how to best name these subsequences
-            # Generate a fasta entry for the expansion
-            fasta_header = f">ExpansionSEQ {fasta_number}"
-
             filler_seq = "".join(seq[start:end])
+
             #! Debug
-            print(f"Filler from: {id.strip()} with seq {filler_seq}")
+            #print(f"Filler from: {id.strip()} with seq {filler_seq}")
 
             # TODO account for when the downstream/upstream are outside of the range, default to just the start or end
             upstream_seq = "".join(seq[upstream_start:upstream_end])
             downstream_seq = "".join(seq[downstream_start:downstream_end])
 
             #! Debug
-            print(f"Upstream Anchor: {upstream_seq}")
-            print(f"Downstream Anchor: {downstream_seq}")
-            print(f"Anchored Seq: {"|".join([upstream_seq, filler_seq, downstream_seq])}")
+            # print(f"Upstream Anchor: {upstream_seq}")
+            # print(f"Downstream Anchor: {downstream_seq}")
+            # print(f"Anchored Seq: {"|".join([upstream_seq, filler_seq, downstream_seq])}")
 
             # If gaps are present in the upstream or downstream regions, truncate the sequence
             if "-" in upstream_seq:
@@ -196,14 +195,22 @@ def generate_patch(tracks: dict[str, tuple[str]], start: int, end: int, output_d
                 downstream_seq = downstream_seq[:downstream_cut_point]
 
             #! Debug
-            print(f"Truncated Anchors: {"|".join([upstream_seq, filler_seq, downstream_seq])}")
+            # with open("debug.txt", "a") as debug:
+            #     debug.write(f"Truncated Anchors: {"|".join([upstream_seq, filler_seq, downstream_seq])}\n")
 
             # Extract the sequence to be written to the fasta file
+            fasta_filename = f"{fasta_number}_{id.strip(">").strip()}_{upstream_start}-{downstream_end}.fasta"
+            fasta_header = f"{id.strip()}:{upstream_start}-{downstream_end}"
             fasta_seq = "".join([upstream_seq, filler_seq, downstream_seq])
 
             # Write the fasta entry to a file, if the file already exists, overwrite it
-            with open(os.path.join(output_dir, f"Expansion_{fasta_number}.fasta"), "w") as patch:
+            with open(os.path.join(output_dir, fasta_filename), "w") as patch:
                 patch.write(f"{fasta_header}\n{fasta_seq}\n")
+
+            #! Debug - Write the aligned expansions to a single file to see what is actually getting pulled out
+            # with open(f"{id.strip('>').strip()}_insertions.fasta", "a") as aligned_expansions:
+            #     aln_seq = ("-" * upstream_start) + fasta_seq + ("-" * (4694030 - downstream_end))
+            #     aligned_expansions.write(f"{fasta_header}\n{aln_seq}\n")
 
             return True
 
@@ -219,7 +226,7 @@ def main(args) -> None:
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
 
-    # TODO validate fasta file instead of assuming input
+    # TODO validate fasta file instead of assuming valid input
     invalid = validate_falign(fasta_file)
     if invalid:
         raise f"Invalid fasta alignment input: {invalid}"
@@ -232,7 +239,7 @@ def main(args) -> None:
     missing_regions = parse_refseq(ref_seq)
 
     #! Debug
-    print(f" Missing regions: {missing_regions}")
+    # print(f" Missing regions: {missing_regions}")
 
     # Process the other sequences to extract the missing regions
     fasta_number = 1
