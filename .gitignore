@@ -19,3 +19,5 @@ tmp/
 
 # Internal only
 internal/
+configs.internal.py
+internalconfigs.py
