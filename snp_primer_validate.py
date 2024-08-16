@@ -11,7 +11,7 @@ import os
 import sys
 
 from classes import Primer
-from internalconfigs import TABIX_PATH
+from internal.internalconfigs import TABIX_PATH
 
 assayfile = open(sys.argv[1], "r")
 primers = []
