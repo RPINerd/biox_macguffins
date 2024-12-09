@@ -1,6 +1,4 @@
-"""
-    Example configs file to set up paths and variables
-"""
+"""Example configs file to set up paths and variables"""
 
 # crispr_validate.py
 # bisulf_validate.py

@@ -1,5 +1,5 @@
 """
-    CIGAR Filter | RPINerd, 08/23/23
+    CIGAR Filter | RPINerd, 12/09/24
 
     For now just a barebones script to filter out reads based on a single
     CIGAR characteristic. Potential here to develop into something much more full featured.
@@ -7,21 +7,23 @@
 
 import re
 import sys
+from pathlib import Path
 
 
-def main() -> None:
-    out = open(sys.argv[2], "w")
+def main(filter_value: int = 50) -> None:
+    """Main function"""
+    out = Path.open(sys.argv[2], "w")
 
-    for line in open(sys.argv[1], "r"):
+    for line in Path.open(sys.argv[1], "r"):
         if line.startswith("@"):
             continue
         cols = line.split("\t")
-        # cols[5] is cigar
-        filter = re.match("([0-9]+)M", cols[5])
-        if filter and int(filter[1]) >= 50:
+        # cols[5] is the cigar
+        filter = re.match(r"([0-9]+)M", cols[5])
+        if filter and int(filter[1]) >= filter_value:
             print(cols[2], cols[3], cols[5])
             out.write("\t".join([cols[2], cols[3], cols[5]]) + "\n")
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1])

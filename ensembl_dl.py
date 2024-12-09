@@ -1,10 +1,13 @@
+"""
+"""
 import sys
+from pathlib import Path
 
 import requests
 
 server = "https://rest.ensembl.org"
 
-with open(sys.argv[1]) as id_list:
+with Path.open(sys.argv[1]) as id_list:
     for line in id_list:
         enst = line.strip().split(".")[0]
         ext = f"/sequence/id/{enst}?type=cdna"
