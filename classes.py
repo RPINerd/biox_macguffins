@@ -1,23 +1,21 @@
-"""
-    All the classes that are used across the biox_macguffins codebase
-"""
+"""All the classes that are used across the biox_macguffins codebase"""
 
 
 class Primer:
-    def __init__(self, chr, num, start, end):
+
+    """A class to represent a primer"""
+
+    def __init__(self, chr: str | int, num: int, start: int, end: int) -> None:
+        """Initializes a primer object"""
         self.chr = chr
         self.number = num
         self.start = start
         self.end = end
 
-    def chr(self):
-        return self.chr
+    def __str__(self) -> str:
+        """Returns a string representation of the primer"""
+        return f"Primer {self.number} on chromosome {self.chr} from {self.start} to {self.end}"
 
-    def start(self):
-        return self.start
-
-    def end(self):
-        return self.end
-
-    def number(self):
-        return self.number
+    def __repr__(self) -> str:
+        """Returns a string representation of the primer"""
+        return f"Primer{self.number}, {self.chr}:{self.start}-{self.end}"

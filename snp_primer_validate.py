@@ -1,7 +1,7 @@
 """
     Primer SNP Validation | RPINerd, 08/23/23
 
-    Simple script to double-check primers desigend by either the Bisulfite or Crispr
+    Simple script to double-check primers designed by either the Bisulfite or Crispr
     pipeline to make sure none create tabix hits (i.e. contain an SNP with frequency > 0.01)
 
     Usage: python [assay file] [b/c]
@@ -9,39 +9,42 @@
 
 import os
 import sys
+from pathlib import Path
 
 from classes import Primer
 from internal.internalconfigs import TABIX_PATH
 
-assayfile = open(sys.argv[1], "r")
-primers = []
-pnum = 1
+SNP_THRESHOLD = 0.01
+
+primers: list[Primer] = []
+pnum: int = 1
 
 print("Reading input file...")
-firstline = True
-for line in assayfile:
-    data = line.split(";")
+with Path.open(sys.argv[1]) as assayfile:
+    firstline = True
+    for line in assayfile:
+        data = line.split(";")
 
-    if firstline:
-        firstline = False
-        continue
-
-    # Bisulfite primers input
-    if sys.argv[2] == "b":
-        if data[23].strip():
-            print("data23 " + data[23])
+        if firstline:
+            firstline = False
             continue
-        p = Primer(data[2], pnum, data[4], data[3])
-        primers.append(p)
-        pnum += 1
 
-    # Crispr primers input
-    elif sys.argv[2] == "c":
-        fp = Primer(data[0], pnum, data[4], data[5])
-        rp = Primer(data[0], pnum, data[11], data[10])
-        primers.append(fp)
-        primers.append(rp)
-    pnum += 1
+        # Bisulfite primers input
+        if sys.argv[2] == "b":
+            if data[23].strip():
+                print("data23 " + data[23])
+                continue
+            p = Primer(data[2], pnum, data[4], data[3])
+            primers.append(p)
+            pnum += 1
+
+        # Crispr primers input
+        elif sys.argv[2] == "c":
+            fp = Primer(data[0], pnum, data[4], data[5])
+            rp = Primer(data[0], pnum, data[11], data[10])
+            primers.append(fp)
+            primers.append(rp)
+        pnum += 1
 
 print(f"Input file parsed! Found {len(primers)} primers.")
 
@@ -53,7 +56,7 @@ for primer in primers:
     results = stream.readlines()
     for i in results:
         result_tabs = i.split("\t")
-        if float(result_tabs[3]) <= 0.01:
+        if float(result_tabs[3]) <= SNP_THRESHOLD:
             continue
         else:
             snp_found += 1

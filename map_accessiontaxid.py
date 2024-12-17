@@ -4,21 +4,23 @@
     Given a fasta input file and reference database, create a tsv output that maps the accession numbers to a taxid
 
     Priority for taxid lookup is:
-      nucl_gb
-      nucl_wgs
-      nucl_wgs_extra
-      dead_nucl
-      dead_wgs
+        nucl_gb
+        nucl_wgs
+        nucl_wgs_extra
+        dead_nucl
+        dead_wgs
 """
 
 
 import argparse
 import sqlite3
+from pathlib import Path
 
 from Bio import SeqIO
 
 
-def main(args):
+def main(args: argparse.Namespace) -> None:
+    """"""
     # Create a connection to the provided database
     conn = sqlite3.connect(args.reference)
     c = conn.cursor()
@@ -37,7 +39,7 @@ def main(args):
             output_list.append([accession, result[0], info, str(record.seq)])
 
     # Write the output to a tsv file
-    with open(args.output, "w") as output:
+    with Path.open(args.output, "w", encoding="local") as output:
         # Header line
         output.write("accession\ttaxid\tinfo\tsequence\n")
         for i in range(len(output_list)):

@@ -8,9 +8,11 @@ import argparse
 import csv
 import logging
 import sqlite3
+from pathlib import Path
 
 
-def main(args):
+def main(args: argparse.Namespace) -> None:
+    """"""
     # TODO handle multiple input files each as a table
     # Set up the database
     conn = sqlite3.connect(args.output)
@@ -27,7 +29,7 @@ def main(args):
     )
 
     # Read in the input file
-    with open(args.input, "r") as input_file:
+    with Path.open(args.input, "r", encoding="local") as input_file:
         if args.tab:
             reader = csv.reader(input_file, delimiter="\t")
         else:
