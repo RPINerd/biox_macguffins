@@ -25,6 +25,7 @@
 
 import argparse
 import os
+from pathlib import Path
 
 from simples import look_backward_match, look_backward_miss, look_forward_match, look_forward_miss
 
@@ -36,6 +37,7 @@ DOWNSTREAM_ANCHOR = 100
 
 
 def parse_args() -> argparse.ArgumentParser:
+    """Simple argument parser for the script"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-f",
@@ -76,8 +78,8 @@ def parse_args() -> argparse.ArgumentParser:
         default="./",
         required=False
     )
-    args = parser.parse_args()
-    return args
+
+    return parser.parse_args()
 
 
 # TODO make sure there is more than 1 sequence
@@ -85,9 +87,6 @@ def parse_args() -> argparse.ArgumentParser:
 def validate_falign(file) -> str:
     """
     Validate the input fasta alignment file
-
-    :param file: Path to the fasta alignment file
-    :rtype: str - Error message if invalid, else None
     """
     message = ""
 
@@ -96,14 +95,16 @@ def validate_falign(file) -> str:
 
 def parse_fasta(file: str) -> dict[str, tuple[str]]:
     """
-    Parse a fasta alignment file into a dictionary of sequences
-    Sequences are stored as tuples of the individual bases
+    Parses a fasta alignment file into a dictionary of sequences.
 
-    :param str: file: Path to the fasta alignment file
-    :rtype: dict[str, tuple[str]] - Dictionary of sequences with the ID as the key
+    Args:
+        file (str): Path to the fasta alignment file.
+
+    Returns:
+        dict[str, tuple[str]]: Dictionary of sequences with the ID as the key.
     """
     tracks = {}
-    with open(file) as alignment:
+    with Path.open(file, "r") as alignment:
         lines = alignment.readlines()
 
         ref = True
@@ -124,8 +125,11 @@ def parse_refseq(ref_seq: tuple[str]) -> list[tuple[int, int]]:
     """
     Parse the reference sequence to identify missing regions
 
-    :param tuple[str]: ref_seq: Tuple of the reference sequence
-    :rtype: list[tuple[int, int]] - List of tuples containing the start and end of missing regions
+    Args:
+        ref_seq (tuple[str]): Tuple of the reference sequence
+
+    Returns:
+        list[tuple[int, int]]: List of tuples containing the start and end of missing regions
     """
     # Unpack refseq and set up some variables
     sequence = ref_seq
@@ -248,7 +252,7 @@ def main(args) -> None:
 if __name__ == "__main__":
     args = parse_args()
 
-    # Establish globals if provided
+    # Overwrite globals if provided
     REGION_SIZE = args.gap
     UPSTREAM_ANCHOR = args.upstream
     DOWNSTREAM_ANCHOR = args.downstream

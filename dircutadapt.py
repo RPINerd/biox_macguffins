@@ -1,18 +1,20 @@
 """
-    CutAdapt on Directory | RPINerd, 2021
+    CutAdapt on Directory | RPINerd, 01/18/25
 
     Tiny wrapper to run a cutadapt command, only for a very specific instance at this point
 """
 
 import os
 import re
+from pathlib import Path
 
 from configs import CUTADAPT_DIR
 
-files = os.listdir(CUTADAPT_DIR)
+files = Path.iterdir(CUTADAPT_DIR)
 adapters = CUTADAPT_DIR + "mmadapt.fasta"
 
 for file in files:
+    # TODO set to be universal
     file_info = re.match(r"(MMV2-R[0-9]{1,2}_S[0-9]{1,2}_L00[1234]_R)([12])(_001.fastq).gz", file)
 
     if not file_info:

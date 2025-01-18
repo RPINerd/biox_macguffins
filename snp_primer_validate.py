@@ -11,8 +11,9 @@ import os
 import sys
 from pathlib import Path
 
-from classes import Primer
 from internal.internalconfigs import TABIX_PATH
+
+from classes import Primer
 
 SNP_THRESHOLD = 0.01
 

@@ -1,5 +1,5 @@
 """
-    Annotation to BED | RPINerd, 12/09/24
+    Annotation to BED | RPINerd, 01/18/25
 
     Given the input from:
         https://hgdownload.soe.ucsc.edu/goldenPath/hgXX/database/rmsk.txt.gz,

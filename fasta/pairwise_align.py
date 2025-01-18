@@ -7,7 +7,7 @@
     Example: python align.py input1.fasta input2.fasta output.fasta
 
     Note: This script requires the Biopython module: http://biopython.org/wiki/Download
-  """
+"""
 
 import sys
 
