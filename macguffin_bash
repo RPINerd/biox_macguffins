@@ -1,0 +1,22 @@
+#!/bin/bash
+
+"""
+Basic functions to add to your bash environment to make life easier.
+
+To add these functions to your bash environment, add the following line to your .bashrc or .bash_profile file:
+source /path/to/macguffin_bash
+"""
+
+function revcomp {
+    if [ $1 = 'r' ]; then
+        echo $2 | rev
+    elif [ $1 = 'c' ]; then
+        echo $2 |  tr "[ATGCatgcNn]" "[TACGtacgNn]"
+    elif [ $1 = 'rc' ]; then
+        echo $2 |  tr "[ATGCatgcNn]" "[TACGtacgNn]" | rev
+    else
+        echo "Error, no method given. (r/c/rc)"
+    fi
+}
+
+export -f revcomp
