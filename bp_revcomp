@@ -1,8 +1,0 @@
-#!/bin/bash
-
-echo "Input: $1"
-
-a=${1//G/A}
-b=${a//C/T}
-echo "$a"
-echo "$b"
