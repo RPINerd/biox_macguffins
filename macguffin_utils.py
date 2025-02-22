@@ -38,7 +38,8 @@ def contains_n_consecutive(n: int, lst: list, sort: bool = False) -> bool:
 
 def ret_idt_repr(seq: str) -> str:
     """
-    Return IDT representation of an oligodesign2 sequence.
+    Return IDT representation of an oligodesign2 sequence
+
     Uppercases all bases and adds a + before LNA bases (upper cased bases in OD2)
 
     :param str: seq: Oligodesign2 sequence with/without LNAs
@@ -50,7 +51,7 @@ def ret_idt_repr(seq: str) -> str:
         return seq
     idt_seq = []
     for alphabet in seq:
-        assert alphabet.lower() in ["a", "c", "g", "t"], seq
+        assert alphabet.lower() in {"a", "c", "g", "t"}, seq
         # Uppercase Base - LNA
         if alphabet.upper() == alphabet:
             alphabet = "+" + alphabet
@@ -68,19 +69,19 @@ def ret_od2_repr(seq: str) -> str:
     :param str: seq: IDT sequence
     :rtype: str
     """
-    is_LNA = False
+    is_lna = False
     od2_seq = []
     for i, a in enumerate(seq):
         assert a.upper() == a, "IDT bases should be upper case"
         # Next base is an LNA base
         if a == "+":
-            is_LNA = True
+            is_lna = True
             continue
-        if is_LNA:
+        if is_lna:
             od2_seq.append(a)
         else:
             od2_seq.append(a.lower())
-        is_LNA = False
+        is_lna = False
 
     return "".join(od2_seq)
 
@@ -138,8 +139,7 @@ def look_forward_match(iterable: list | tuple, start: int, char: str) -> int:
     while not end_idx and idx < len(iterable):
         idx += 1
         if iterable[idx] == char:
-            end_idx = idx - 1
-            return end_idx
+            return idx - 1
 
     raise ValueError(
         f"No match found looking forwards from index {start} along interable:\n{iterable[start:len(iterable)]}"
@@ -175,12 +175,9 @@ def look_backward_match(iterable: list | tuple, start: int, char: str) -> int:
     idx = start
     end_idx = None
     while not end_idx and idx > 0:
-        # print(idx)
-        # print(iterable[idx])
         idx -= 1
         if iterable[idx] == char:
-            end_idx = idx + 1
-            return end_idx
+            return idx + 1
 
     raise ValueError(f"No match found looking backwards from index {start} along interable:\n{iterable}")
 

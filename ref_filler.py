@@ -26,7 +26,7 @@
 import argparse
 from pathlib import Path
 
-from simples import look_backward_match, look_backward_miss, look_forward_match, look_forward_miss
+from macguffin_utils import look_backward_match, look_backward_miss, look_forward_match, look_forward_miss
 
 # Minimum gap size in refseq to consider filling
 REGION_SIZE = 150
