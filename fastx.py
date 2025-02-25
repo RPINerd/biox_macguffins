@@ -1,5 +1,5 @@
 """
-    Module containing functions related to operations on sequence files (fasta/fastq)
+    Functions related to operations on sequence files (fasta/fastq)
 
     Operations performed in these functions are limited in scope to the sequences themselves and do not
     take into account the read number of a record (i.e. read1, read2)
@@ -123,3 +123,31 @@ def uniq(records: "Generator[SeqRecord, None, None]") -> dict[str, list[str]]:
             raise Exception(f"An error occurred while processing the records: {e}")
 
     return uniq_seqs
+
+
+def window_shopper(records: "Generator[SeqRecord, None, None]", window_size: int, step: int) -> dict[str, int]:
+    """
+    Generate a dictionary of sequences and their counts from a sliding window analysis
+
+    Args:
+        records (Generator[SeqRecord]): Generator of SeqRecord objects
+        window_size (int): Size of the sliding window
+        step (int): How many steps to take per window iteration
+
+    Returns:
+        dict[str, int]: Dictionary of sequences and their counts
+    """
+    window_dict: dict[str, int] = {}
+    for record in records:
+        seq = str(record.seq)
+        start = 0
+        while start < len(seq) - window_size:
+            end = start + window_size
+            window = seq[start:end]
+            try:
+                window_dict[window] += 1
+            except KeyError:
+                window_dict[window] = 1
+            start += step
+
+    return window_dict

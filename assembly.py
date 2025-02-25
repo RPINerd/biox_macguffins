@@ -6,32 +6,16 @@ between reads. The assembly of the original sequence
 is equivalent to finding such a path through the graph
 that each read is only used once. The path is found using
 the Depth First Search (DFS) algorithm.
-
-An example of usage of this module:
-
-from assembly import SequenceAssembler
-
-s = SequenceAssembler()
-
-# read data
-with open("data.fasta") as data:
-    s.read_fasta(data)
-
-# run assembly
-s.assemble()
-
-# access path and resulting sequence
-
-print s.path
-print s.sequence
-
 """
 
 from itertools import combinations
+from pathlib import Path
 
 
 class Read:
-    """Class representing reads in the graph
+
+    """
+    Class representing reads in the graph
 
     Parameters
     ----------
@@ -78,7 +62,9 @@ class Read:
 
 
 class SequenceAssembler:
-    """Class for sequence assembler
+
+    """
+    Class for sequence assembler
 
     Attributes
     ----------
@@ -108,7 +94,8 @@ class SequenceAssembler:
         self.num_reads = 0
 
     def add_read(self, read):
-        """Add read to the graph.
+        """
+        Add read to the graph.
 
         If read is already in the dictinary of reads,
         increment its visit limit.
@@ -121,7 +108,8 @@ class SequenceAssembler:
         self.num_reads += 1
 
     def read_fasta(self, handle):
-        """Read fragments from input file handle.
+        """
+        Read fragments from input file handle.
 
         For example,
 
@@ -133,7 +121,7 @@ class SequenceAssembler:
         read = ""
         for line in handle:
             if line[0] == ">":
-                if len(read):
+                if read:
                     self.add_read(read)
                     read = ""
             else:
@@ -141,12 +129,12 @@ class SequenceAssembler:
         self.add_read(read)
 
     def calculate_overlap(self, r1, r2):
-        """Check if r1 and r2 can be glued.
+        """
+        Check if r1 and r2 can be glued.
 
         Calculate how much one of them protrudes
         with respect to another after they are glued.
         """
-
         # We know that reads that can be glued,
         # share at least half of their length.
         # Make sure one is not shorter than
@@ -216,14 +204,14 @@ class SequenceAssembler:
                     self.reads[r2].overlaps[r1] = len(r1) - overlap
 
     def find_path(self, num_visited, read):
-        """Implements the DFS algorithm.
+        """
+        Implements the DFS algorithm.
 
         For each visited read, we check what reads can be visited next
         and visit one of them. If at some point we are at a dead end,
         we go back and try to visit another one. Continue until we
         visit all reads.
         """
-
         self.path.append(read)
         r = self.reads[read]
         r.visited += 1
@@ -240,14 +228,14 @@ class SequenceAssembler:
         return finished
 
     def assemble(self):
-        """Assemble the original sequence.
+        """
+        Assemble the original sequence.
 
         After building the graph (reading all reads)
         calculate all overlaps run the DFS algorithm.
         After finding the path to visit all reads only once,
         assemble the original sequence.
         """
-
         # Calculate overlaps between each pair of reads.
 
         for r1, r2 in combinations(self.reads, 2):
@@ -301,3 +289,23 @@ class SequenceAssembler:
                     self.sequence += self.path[i + 1][-overlap:]
                 elif overlap < 0:
                     self.sequence = self.sequence[:overlap]
+
+
+def main() -> None:
+    """Example Implementation"""
+    s = SequenceAssembler()
+
+    # Read data
+    with Path.open("data.fasta") as data:
+        s.read_fasta(data)
+
+    # Run assembly
+    s.assemble()
+
+    # Access path and resulting sequence
+    print(s.path)
+    print(s.sequence)
+
+
+if __name__ == "__main__":
+    main()

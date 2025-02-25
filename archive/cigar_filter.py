@@ -1,8 +1,7 @@
 """
     CIGAR Filter | RPINerd, 12/09/24
 
-    For now just a barebones script to filter out reads based on a single
-    CIGAR characteristic. Potential here to develop into something much more full featured.
+    For now just a
 """
 
 import re
