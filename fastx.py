@@ -97,6 +97,47 @@ def filter_seq(records: "Generator[SeqRecord, None, None]", regexs: list[re.Patt
     return pruned
 
 
+def subseq_search(records: "Generator[SeqRecord, None, None]", subseqs: list[str]) -> list[str]:
+    """"""
+    loc = []
+    hit_dict = {}
+    for subseq in subseqs:
+        hit_list = []
+        for record in records:
+            regex = re.search(subseq, record)
+            if regex:
+                hit_list.append(record)
+                loc.append(regex.span()[0])
+
+        hit_dict[subseq] = hit_list
+
+        for found in hit_list:
+            reads.pop(found)
+
+    if args.reporting:
+        logging.info("Generating reports..")
+        p_read_file = open("primer_report.txt", "w")
+        for key in hit_dict:
+            p_read_file.write(str(key) + "|" + str(hit_dict[key]) + "\n")
+        p_read_file.close()
+        logging.info("Primer Report Written..")
+        np_read_file = open("nonprimed.seqs", "w")
+        for r in reads:
+            np_read_file.write(r + "\n")
+        np_read_file.close()
+        logging.info("Non-Primed Sequences Written..")
+    else:
+        logging.info("Skipping report generation..")
+
+    total_nonp = 0
+    for seq in reads.keys():
+        total_nonp += len(reads[seq])
+    avg_pos = sum(loc) / len(loc)
+    logging.info("Average subseq start position: " + str(avg_pos))
+    logging.info("Unique read sequences without subseq match: " + str(len(reads)))
+    logging.info("Total reads without subseq match: " + str(total_nonp))
+
+
 def uniq(records: "Generator[SeqRecord, None, None]") -> dict[str, list[str]]:
     """
     Consolidate a fastx file into dictionary of unique sequences

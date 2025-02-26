@@ -1,4 +1,9 @@
-""""""
+"""
+    Module containing functions related to operations on readsets
+
+    Differentiation from the fastaq module is that fuctions in this module should focus on operations
+    which require the use of the actual read number of a record (i.e. read1, read2)
+"""
 from collections.abc import Generator
 
 from Bio.SeqRecord import SeqRecord
@@ -57,3 +62,27 @@ def filter_complexity(
     print(f"Complex Reads: {len(complex_reads)}")
 
     return complex_reads
+
+
+def synchronize(
+    read1: Generator[SeqRecord, None, None],
+    read2: Generator[SeqRecord, None, None]) -> dict[str, tuple[SeqRecord, SeqRecord]]:
+    """
+    Synchronize R1 and R2 based on read ID
+
+    Args:
+        read1 (Generator[SeqRecord]): The generator object from SeqIO.parse(R1.fastq)
+        read2 (Generator[SeqRecord]): The generator object from SeqIO.parse(R2.fastq)
+
+    Returns:
+        common_reads (dict[str, tuple[SeqRecord, SeqRecord]]): Dictionary of reads with matching IDs
+    """
+    r1_reads = {record.id.split()[0]: record for record in read1}
+    r2_reads = {record.id.split()[0]: record for record in read2}
+
+    common_reads: dict[str, tuple[SeqRecord, SeqRecord]] = {}
+    for read_id, record1 in r1_reads.items():
+        if read_id in r2_reads:
+            common_reads[read_id] = (record1, r2_reads[read_id])
+
+    return common_reads
