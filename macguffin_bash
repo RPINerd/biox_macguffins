@@ -19,4 +19,13 @@ function revcomp {
     fi
 }
 
-export -f revcomp
+function to_fasta() {
+    local input_file="$1"
+    local output_file="${input_file%.fastq}.fasta"
+
+    sed -n '1~4s/^@/>/p;2~4p' "$input_file" > "$output_file"
+
+    echo "Conversion complete. Output saved as $output_file"
+}
+
+export -f revcomp to_fasta
