@@ -7,7 +7,25 @@ To add these functions to your bash environment, add the following line to your 
 source /path/to/macguffin_bash
 """
 
-function revcomp {
+function create_fasta() {
+    local input="$1"
+    local output="${input%.txt}.fasta"
+
+    awk '{print ">seq_" NR "\n" $0}' $input > $output
+
+    echo "Generation complete. New fasta saved as $output"
+}
+
+function interleave_fasta() {
+    local input_fasta="$1"
+    local output_fasta="${input_fasta%.fasta}_interleaved.fasta"
+
+    awk '/^>/ {printf("\n%s\n",$0);next; } { printf("%s",$0);} END {printf("\n");}' < $input_fasta > $output_fasta
+
+    echo "Interleaving complete. Output saved as $output_fasta"
+}
+
+function revcomp() {
     if [ $1 = 'r' ]; then
         echo $2 | rev
     elif [ $1 = 'c' ]; then
@@ -19,7 +37,7 @@ function revcomp {
     fi
 }
 
-function to_fasta() {
+function fq_to_fa() {
     local input_file="$1"
     local output_file="${input_file%.fastq}.fasta"
 
@@ -28,4 +46,4 @@ function to_fasta() {
     echo "Conversion complete. Output saved as $output_file"
 }
 
-export -f revcomp to_fasta
+export -f create_fasta interleave_fasta revcomp fq_to_fa
