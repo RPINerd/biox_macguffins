@@ -8,10 +8,12 @@ from collections.abc import Generator
 
 from Bio.SeqRecord import SeqRecord
 
+from configs import MIN_LENGTH_COMPLEXITY
+
 
 def filter_complexity(
-    read1: Generator[SeqRecord, None, None],
-    read2: Generator[SeqRecord, None, None]) -> dict[str, tuple[SeqRecord, SeqRecord]]:
+    read1: Generator[SeqRecord],
+    read2: Generator[SeqRecord]) -> dict[str, tuple[SeqRecord, SeqRecord]]:
     """
     Perform a filtering pass on a set of reads to remove low complexity reads
 
@@ -37,7 +39,7 @@ def filter_complexity(
             bool: True if the read is low-complexity
         """
         seq_len = len(record.seq)
-        if seq_len <= 50:
+        if seq_len <= MIN_LENGTH_COMPLEXITY:
             return True
         base_counts = {base: record.seq.count(base) for base in ["A", "T", "C", "G", "N"]}
         for _, count in base_counts.items():
@@ -48,6 +50,8 @@ def filter_complexity(
     complex_reads: dict[str, tuple[SeqRecord, SeqRecord]] = {}
     dropped_reads: int = 0
     for record_r1, record_r2 in zip(read1, read2):
+        if record_r1.id is None or record_r2.id is None:
+            raise TypeError(f"Read ID is None for record pair: {record_r1},{record_r2}")
         generic_read_id = record_r1.id.split()[0]
         if record_r2.id.split()[0] != generic_read_id:
             raise TypeError(f"Read ID mismatch: {generic_read_id} != {record_r2.id.split()[0]}")
@@ -65,8 +69,8 @@ def filter_complexity(
 
 
 def synchronize(
-    read1: Generator[SeqRecord, None, None],
-    read2: Generator[SeqRecord, None, None]) -> dict[str, tuple[SeqRecord, SeqRecord]]:
+    read1: Generator[SeqRecord],
+    read2: Generator[SeqRecord]) -> dict[str, tuple[SeqRecord, SeqRecord]]:
     """
     Synchronize R1 and R2 based on read ID
 
@@ -77,8 +81,17 @@ def synchronize(
     Returns:
         common_reads (dict[str, tuple[SeqRecord, SeqRecord]]): Dictionary of reads with matching IDs
     """
-    r1_reads = {record.id.split()[0]: record for record in read1}
-    r2_reads = {record.id.split()[0]: record for record in read2}
+    r1_reads: dict[str, SeqRecord] = {}
+    r2_reads: dict[str, SeqRecord] = {}
+    for r1, r2 in zip(read1, read2):
+        if r1.id is None or r2.id is None:
+            raise TypeError(f"Read ID is None for record pair: {r1},{r2}")
+
+        generic_read_id = r1.id.split()[0]
+        if r2.id.split()[0] != generic_read_id:
+            raise TypeError(f"Read ID mismatch: {generic_read_id} != {r2.id.split()[0]}")
+        r1_reads[generic_read_id] = r1
+        r2_reads[generic_read_id] = r2
 
     common_reads: dict[str, tuple[SeqRecord, SeqRecord]] = {}
     for read_id, record1 in r1_reads.items():
