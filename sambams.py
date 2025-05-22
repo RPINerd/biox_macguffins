@@ -1,6 +1,4 @@
-"""
-    Functions related to manipulation of sam/bam files
-"""
+"""Functions related to manipulation of sam/bam files"""
 
 import re
 import sys

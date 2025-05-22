@@ -14,10 +14,13 @@ def contains_n_consecutive(n: int, lst: list, sort: bool = False) -> bool:
         n = 4, lst = [1, 4, 5, 6, 10]
         returns False because the longest sequence of consescutive numbers is only 3  - (4,5,6)
 
-    :param int: n: Number of consecutive numbers to check for
-    :param list: lst: List of integers to check
-    :param bool: sort: Sort the list before checking
-    :rtype: bool
+    Args:
+        n (int): Number of consecutive numbers to check for
+        lst (list): List of integers to check
+        sort (bool): Sort the list before checking
+
+    Returns:
+        bool: True if the list contains n or more consecutive numbers
     """
     if sort:
         lst = sorted(lst)
@@ -42,8 +45,11 @@ def ret_idt_repr(seq: str) -> str:
 
     Uppercases all bases and adds a + before LNA bases (upper cased bases in OD2)
 
-    :param str: seq: Oligodesign2 sequence with/without LNAs
-    :rtype: str
+    Args:
+        seq (str): Oligodesign2 sequence with/without LNAs
+
+    Returns:
+        str: IDT sequence
     """
     # Already in IDT format
     if seq.find("+") != -1:
@@ -66,8 +72,11 @@ def ret_od2_repr(seq: str) -> str:
     """
     Return Oligodesign2 representation of an IDT sequence
 
-    :param str: seq: IDT sequence
-    :rtype: str
+    Args:
+        seq (str): IDT sequence with/without LNAs
+
+    Returns:
+        str: OD2 sequence
     """
     is_lna = False
     od2_seq = []
@@ -90,8 +99,11 @@ def revcomp(seq: str) -> str:
     """
     Return the reverse complement of a sequence
 
-    :param str: seq: Sequence to reverse complement
-    :rtype: str
+    Args:
+        seq (str): Sequence to reverse complement
+
+    Returns:
+        str: Reverse complement of the sequence
     """
     return seq.translate(str.maketrans("ATCGatcg", "TAGCtagc"))[::-1]
 
@@ -100,8 +112,11 @@ def translateRNA(seq: str) -> str:
     """
     Return the translation of a RNA sequence
 
-    :param str: seq: RNA sequence to translate
-    :rtype: str
+    Args:
+        seq (str): RNA sequence to translate
+
+    Returns:
+        str: Translated sequence
     """
     return seq.translate(str.maketrans("AUGCaugc", "TACGtacg"))
 
@@ -110,8 +125,11 @@ def convertRNA(seq: str) -> str:
     """
     Return the conversion of a RNA sequence to DNA
 
-    :param str: seq: RNA sequence to convert
-    :rtype: str
+    Args:
+        seq (str): RNA sequence to convert
+
+    Returns:
+        str: Converted sequence
     """
     return seq.translate(str.maketrans("Uu", "Tt"))
 
@@ -120,8 +138,11 @@ def complement(seq: str) -> str:
     """
     Return the complement of a sequence
 
-    :param str: seq: Sequence to complement
-    :rtype: str
+    Args:
+        seq (str): Sequence to complement
+
+    Returns:
+        str: Complement of the sequence
     """
     return seq.translate(str.maketrans("ATCGatcg", "TAGCtagc"))
 
@@ -130,9 +151,16 @@ def look_forward_match(iterable: list | tuple, start: int, char: str) -> int:
     """
     Look ahead in an iterable for the next point where a character is the same
 
-    :param iterable: iterable: A list/tuple to look forward through
-    :param int: start: The initial index to being from
-    :param str: char: The character to look for the end of in the sequence
+    Args:
+        iterable (list | tuple): A list/tuple to look forward through
+        start (int): The initial index to being from
+        char (str): The character to look for the end of in the sequence
+
+    Returns:
+        int: The index of the next point where the character is the same
+
+    Raises:
+        ValueError: If no match is found
     """
     idx = start
     end_idx = None
@@ -150,9 +178,16 @@ def look_forward_miss(iterable: list | tuple, start: int, char: str) -> int:
     """
     Look ahead in an iterable for the next point where a character is different
 
-    :param iterable: iterable: A list/tuple to look forward through
-    :param int: start: The initial index to being from
-    :param str: char: The character to look for the end of in the sequence
+    Args:
+        iterable (list | tuple): A list/tuple to look forward through
+        start (int): The initial index to being from
+        char (str): The character to look for the end of in the sequence
+
+    Returns:
+        int: The index of the next point where the character is different
+
+    Raises:
+        ValueError: If no match is found
     """
     idx = start
     end_idx = None
@@ -161,6 +196,10 @@ def look_forward_miss(iterable: list | tuple, start: int, char: str) -> int:
         if iterable[idx] != char:
             end_idx = idx
 
+    if end_idx is None:
+        raise ValueError(
+            f"No match found looking forwards from index {start} along interable:\n{iterable[start:len(iterable)]}"
+        )
     return end_idx
 
 
@@ -168,9 +207,16 @@ def look_backward_match(iterable: list | tuple, start: int, char: str) -> int:
     """
     Look behind in an iterable for the next point where a character is the same
 
-    :param iterable: iterable: A list/tuple to look backward through
-    :param int: start: The initial index to being from
-    :param str: char: The character to look for the end of in the sequence
+    Args:
+        iterable (list | tuple): A list/tuple to look backward through
+        start (int): The initial index to being from
+        char (str): The character to look for the end of in the sequence
+
+    Returns:
+        int: The index of the next point where the character is the same
+
+    Raises:
+        ValueError: If no match is found
     """
     idx = start
     end_idx = None
@@ -186,9 +232,16 @@ def look_backward_miss(iterable: list | tuple, start: int, char: str) -> int:
     """
     Look behind in an iterable for the next point where a character is different
 
-    :param iterable: iterable: A list/tuple to look backward through
-    :param int: start: The initial index to being from
-    :param str: char: The character to look for the end of in the sequence
+    Args:
+        iterable (list | tuple): A list/tuple to look backward through
+        start (int): The initial index to being from
+        char (str): The character to look for the end of in the sequence
+
+    Returns:
+        int: The index of the next point where the character is different
+
+    Raises:
+        ValueError: If no match is found
     """
     idx = start
     end_idx = None
@@ -197,4 +250,8 @@ def look_backward_miss(iterable: list | tuple, start: int, char: str) -> int:
         if iterable[idx] != char:
             end_idx = idx
 
+    if end_idx is None:
+        raise ValueError(
+            f"No match found looking backwards from index {start} along interable:\n{iterable[start:len(iterable)]}"
+        )
     return end_idx

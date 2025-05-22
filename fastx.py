@@ -6,16 +6,13 @@
 """
 import logging
 import re
+from collections.abc import Generator
 from pathlib import Path
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from collections.abc import Generator
-
-    from Bio.SeqRecord import SeqRecord
+from Bio.SeqRecord import SeqRecord
 
 
-def dg_count(records: "Generator[SeqRecord, None, None]") -> dict[str, int]:
+def dg_count(records: Generator[SeqRecord]) -> dict[str, int]:
     """
     Count the number of degenerate bases in a set of sequences
 
@@ -57,7 +54,7 @@ def diff(set1: dict[str, str], set2: dict[str, str]) -> dict[str, str]:
     return {seq: id for seq, id in set1.items() if seq not in set2}
 
 
-def filter_seq(records: "Generator[SeqRecord, None, None]", regexs: list[re.Pattern] | None, drop: bool = True) -> list["SeqRecord"]:
+def filter_seq(records: Generator[SeqRecord], regexs: list[re.Pattern], drop: bool = True) -> list[SeqRecord]:
     """
     Filter a set of sequences based on the provided regular expressions
 
@@ -99,7 +96,7 @@ def filter_seq(records: "Generator[SeqRecord, None, None]", regexs: list[re.Patt
     return pruned
 
 
-def subseq_search(records: "Generator[SeqRecord, None, None]", subseqs: list[str]) -> None:
+def subseq_search(records: Generator[SeqRecord], subseqs: list[str]) -> None:
     """
     Given a list of query sequences, iterate through a set of records and summarize the presence of the query sequences
 
@@ -124,9 +121,12 @@ def subseq_search(records: "Generator[SeqRecord, None, None]", subseqs: list[str
     loc = []
     hit_dict: dict[str, list[SeqRecord]] = {}
     nohit_records: list[SeqRecord] = []
+    hit_file: Path = Path("hit_reports.txt")
+    nohit_file: Path = Path("nohit_reports.txt")
     for record in records:
         if not isinstance(record, SeqRecord):
             raise ValueError(f"Input records must be SeqRecord objects! Found {type(record)}")
+
         nohit = True
         for subseq in subseqs:
             regex: re.Match | None = re.search(subseq, record.seq)
@@ -135,20 +135,20 @@ def subseq_search(records: "Generator[SeqRecord, None, None]", subseqs: list[str
                 try:
                     hit_dict[subseq].append(record)
                 except KeyError:
-                    hit_dict[subseq] = record
+                    hit_dict[subseq] = [record]
                 loc.append(regex.span()[0])
         if nohit:
             nohit_records.append(record)
 
     logging.info("Generating reports..")
 
-    with Path.open("hit_reports.txt", "w") as hit_file:
+    with Path.open(hit_file, "w") as hf:
         for query_seq, record_list in hit_dict.items():
-            hit_file.write(f"{query_seq}|{",".join([record.id for record in record_list])}\n")
+            hf.write(f"{query_seq}|{",".join([record.id for record in record_list])}\n")
     logging.info("Primer Report Written..")
 
-    with Path.open("nohit_reports.txt", "w") as nohit_file:
-        nohit_file.write("\n".join([record.id for record in nohit_records]))
+    with Path.open(nohit_file, "w") as nhf:
+        nhf.write("\n".join([record.id for record in nohit_records]))
     logging.info("Non-Primed Sequences Written..")
 
     avg_pos = sum(loc) / len(loc)
@@ -156,7 +156,7 @@ def subseq_search(records: "Generator[SeqRecord, None, None]", subseqs: list[str
     logging.info(f"Reads without subseq hit: {len(nohit_records)}")
 
 
-def uniq(records: "Generator[SeqRecord, None, None]") -> dict[str, list[str]]:
+def uniq(records: Generator[SeqRecord]) -> dict[str, list[str]]:
     """
     Consolidate a fastx file into dictionary of unique sequences
 
@@ -184,7 +184,7 @@ def uniq(records: "Generator[SeqRecord, None, None]") -> dict[str, list[str]]:
     return uniq_seqs
 
 
-def window_shopper(records: "Generator[SeqRecord, None, None]", window_size: int, step: int) -> dict[str, int]:
+def window_shopper(records: Generator[SeqRecord], window_size: int, step: int) -> dict[str, int]:
     """
     Generate a dictionary of sequences and their counts from a sliding window analysis
 
