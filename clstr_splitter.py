@@ -11,8 +11,12 @@ from pathlib import Path
 cur_clst = ""
 clusters = {}
 first = True
-with Path.open(sys.argv[0], "r") as clstr_file:
-    for line in clstr_file:
+clst_file = Path(sys.argv[0])
+if not clst_file.exists():
+    raise FileNotFoundError(f"Cluster file {clst_file} does not exist!")
+
+with Path.open(clst_file) as infile:
+    for line in infile:
         if first:
             first = False
             cur_clst = line.strip(">")
@@ -39,7 +43,7 @@ for key in clusters.items():
     elif len(clusters[key]) <= 2:
         remainder.extend(clusters[key])
     else:
-        clstr_out_name = str(key).replace(" ", "_").strip() + ".txt"
+        clstr_out_name = Path(clst_file).parent / (str(key).replace(" ", "_").strip() + ".txt")
         with Path.open(clstr_out_name, "w") as clstr_out:
             for hit in clusters[key]:
                 clstr_out.write(str(hit) + "\n")
