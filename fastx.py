@@ -127,6 +127,9 @@ def subseq_search(records: Generator[SeqRecord], subseqs: list[str]) -> None:
         if not isinstance(record, SeqRecord):
             raise ValueError(f"Input records must be SeqRecord objects! Found {type(record)}")
 
+        if record.id is None:
+            continue  # Skip records without an id
+
         nohit = True
         for subseq in subseqs:
             regex: re.Match | None = re.search(subseq, record.seq)

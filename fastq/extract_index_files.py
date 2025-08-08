@@ -2,7 +2,7 @@
 Extract index sequences from paired-end FASTQ files (R1/R2) and write to I1/I2 FASTQ files.
 
 Usage:
-    python fq_index_extract.py -r R1.fastq.gz
+    python extract_index_files.py -r R1.fastq.gz
 """
 
 import argparse
@@ -17,7 +17,7 @@ from Bio import SeqIO
 def open_fastq(path: Path, mode: str = "rt") -> IO[Any] | gzip.GzipFile:
     """Open a FASTQ file, handling gzip if needed."""
     if path.suffix == ".gz":
-        return gzip.open(path, mode)
+        return gzip.open(path, "rt")
     return Path.open(path, mode)
 
 

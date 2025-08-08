@@ -10,13 +10,14 @@
 """
 
 import sys
+from pathlib import Path
 
 from Bio import Align, Seq, SeqIO
 
 # Read in the input files
 input_file_1 = sys.argv[1]
 input_file_2 = sys.argv[2]
-output_file = sys.argv[3]
+output_file = Path(sys.argv[3])
 
 # Create lists for the sequences and IDs in the input files
 sequences_1 = []
@@ -54,7 +55,7 @@ for i in range(len(sequences_1)):
         )
 
 # Write the alignments to the output file
-with open(output_file, "w") as output:
+with Path.open(output_file, "w") as output:
     for i in range(len(alignments)):
         output.write(alignments[i][0] + "\n")
         output.write(str(alignments[i][1][0][0]) + "\n")
