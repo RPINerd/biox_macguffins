@@ -3,6 +3,11 @@
 
     Collection of very basic utilities for use in other scripts.
 """
+import gzip
+from collections.abc import Iterator
+from pathlib import Path
+from typing import TextIO
+
 RNA_TRANSLATE = str.maketrans("AUGCaugc", "TACGtacg")
 RNA_CONVERT = str.maketrans("Uu", "Tt")
 DNA_TRANSLATE = str.maketrans("ATCGatcg", "TAGCtagc")
@@ -230,25 +235,31 @@ def smart_iter(filepath: Path) -> Iterator[str]:
     Iterate over a file, handling gzip files automatically.
 
     Args:
-        iterable (list | tuple): A list/tuple to look backward through
-        start (int): The initial index to being from
-        char (str): The character to look for the end of in the sequence
+        filepath (Path): Path to the file.
 
     Returns:
-        int: The index of the next point where the character is different
-
-    Raises:
-        ValueError: If no match is found
+        Iterator over lines in the file.
     """
-    idx = start
-    end_idx = None
-    while not end_idx and idx > 0:
-        idx -= 1
-        if iterable[idx] != char:
-            end_idx = idx
+    if filepath.suffix == ".gz":
+        with gzip.open(filepath, "r") as f:
+            for line in f:
+                yield line.decode("utf-8").strip("\n")
+    else:
+        with Path.open(filepath) as f:
+            for line in f:
+                yield line.strip("\n")
 
-    if end_idx is None:
-        raise ValueError(
-            f"No match found looking backwards from index {start} along interable:\n{iterable[start:len(iterable)]}"
-        )
-    return end_idx
+
+def smart_open(filepath: Path) -> TextIO:
+    """
+    Open a file, handling gzip files automatically.
+
+    Args:
+        filepath (Path): Path to the file.
+
+    Returns:
+        File object.
+    """
+    if filepath.suffix == ".gz":
+        return gzip.open(filepath, "rt")
+    return filepath.open("r", encoding="utf-8")

@@ -1,6 +1,6 @@
 [project]
 name = "biox-macguffins"
-version = "1.5.0"
+version = "1.6.0"
 description = "Personal collection of Bioinformatics tools and scripts."
 readme = "README.md"
 requires-python = ">=3.13"
