@@ -3,6 +3,26 @@
 
     Collection of very basic utilities for use in other scripts.
 """
+RNA_TRANSLATE = str.maketrans("AUGCaugc", "TACGtacg")
+RNA_CONVERT = str.maketrans("Uu", "Tt")
+DNA_TRANSLATE = str.maketrans("ATCGatcg", "TAGCtagc")
+IUPAC_TRANSLATE = str.maketrans(
+    "ATGCRYMKSWHBVDNatgcrymkswhbvdn",
+    "TACGYRKMSWDVBHNtacgyrkmswdvbhn"
+)
+WOBBLE_BASES = {
+    "R": ["A", "G"],            # puRine
+    "Y": ["C", "T"],            # pYrimidine
+    "M": ["A", "C"],            # aMino
+    "K": ["G", "T"],            # Keto
+    "S": ["G", "C"],            # Strong
+    "W": ["A", "T"],            # Weak
+    "H": ["A", "C", "T"],       # not G
+    "B": ["G", "T", "C"],       # not A
+    "V": ["G", "A", "C"],       # not T
+    "D": ["G", "A", "T"],       # not C
+    "N": ["G", "A", "C", "T"],  # aNy
+}
 
 
 def contains_n_consecutive(n: int, lst: list, sort: bool = False) -> bool:
@@ -39,112 +59,58 @@ def contains_n_consecutive(n: int, lst: list, sort: bool = False) -> bool:
     return False
 
 
-def ret_idt_repr(seq: str) -> str:
+def look_backward_match(iterable: list | tuple, start: int, char: str) -> int:
     """
-    Return IDT representation of an oligodesign2 sequence
-
-    Uppercases all bases and adds a + before LNA bases (upper cased bases in OD2)
+    Look behind in an iterable for the next point where a character is the same
 
     Args:
-        seq (str): Oligodesign2 sequence with/without LNAs
+        iterable (list | tuple): A list/tuple to look backward through
+        start (int): The initial index to being from
+        char (str): The character to look for the end of in the sequence
 
     Returns:
-        str: IDT sequence
+        int: The index of the next point where the character is the same
+
+    Raises:
+        ValueError: If no match is found
     """
-    # Already in IDT format
-    if seq.find("+") != -1:
-        print("Sequence already in IDT format")
-        return seq
-    idt_seq = []
-    for alphabet in seq:
-        assert alphabet.lower() in {"a", "c", "g", "t"}, seq
-        # Uppercase Base - LNA
-        if alphabet.upper() == alphabet:
-            alphabet = "+" + alphabet
-        # Lowercase Base
-        else:
-            alphabet = alphabet.upper()
-        idt_seq.append(alphabet)
-    return "".join(idt_seq)
+    idx = start
+    end_idx = None
+    while not end_idx and idx > 0:
+        idx -= 1
+        if iterable[idx] == char:
+            return idx + 1
+
+    raise ValueError(f"No match found looking backwards from index {start} along interable:\n{iterable}")
 
 
-def ret_od2_repr(seq: str) -> str:
+def look_backward_miss(iterable: list | tuple, start: int, char: str) -> int:
     """
-    Return Oligodesign2 representation of an IDT sequence
+    Look behind in an iterable for the next point where a character is different
 
     Args:
-        seq (str): IDT sequence with/without LNAs
+        iterable (list | tuple): A list/tuple to look backward through
+        start (int): The initial index to being from
+        char (str): The character to look for the end of in the sequence
 
     Returns:
-        str: OD2 sequence
+        int: The index of the next point where the character is different
+
+    Raises:
+        ValueError: If no match is found
     """
-    is_lna = False
-    od2_seq = []
-    for i, a in enumerate(seq):
-        assert a.upper() == a, "IDT bases should be upper case"
-        # Next base is an LNA base
-        if a == "+":
-            is_lna = True
-            continue
-        if is_lna:
-            od2_seq.append(a)
-        else:
-            od2_seq.append(a.lower())
-        is_lna = False
+    idx = start
+    end_idx = None
+    while not end_idx and idx > 0:
+        idx -= 1
+        if iterable[idx] != char:
+            end_idx = idx
 
-    return "".join(od2_seq)
-
-
-def revcomp(seq: str) -> str:
-    """
-    Return the reverse complement of a sequence
-
-    Args:
-        seq (str): Sequence to reverse complement
-
-    Returns:
-        str: Reverse complement of the sequence
-    """
-    return seq.translate(str.maketrans("ATCGatcg", "TAGCtagc"))[::-1]
-
-
-def translateRNA(seq: str) -> str:
-    """
-    Return the translation of a RNA sequence
-
-    Args:
-        seq (str): RNA sequence to translate
-
-    Returns:
-        str: Translated sequence
-    """
-    return seq.translate(str.maketrans("AUGCaugc", "TACGtacg"))
-
-
-def convertRNA(seq: str) -> str:
-    """
-    Return the conversion of a RNA sequence to DNA
-
-    Args:
-        seq (str): RNA sequence to convert
-
-    Returns:
-        str: Converted sequence
-    """
-    return seq.translate(str.maketrans("Uu", "Tt"))
-
-
-def complement(seq: str) -> str:
-    """
-    Return the complement of a sequence
-
-    Args:
-        seq (str): Sequence to complement
-
-    Returns:
-        str: Complement of the sequence
-    """
-    return seq.translate(str.maketrans("ATCGatcg", "TAGCtagc"))
+    if end_idx is None:
+        raise ValueError(
+            f"No match found looking backwards from index {start} along interable:\n{iterable[start:len(iterable)]}"
+        )
+    return end_idx
 
 
 def look_forward_match(iterable: list | tuple, start: int, char: str) -> int:
@@ -203,34 +169,65 @@ def look_forward_miss(iterable: list | tuple, start: int, char: str) -> int:
     return end_idx
 
 
-def look_backward_match(iterable: list | tuple, start: int, char: str) -> int:
+def ret_idt_repr(seq: str) -> str:
     """
-    Look behind in an iterable for the next point where a character is the same
+    Return IDT representation of an oligodesign2 sequence
+
+    Uppercases all bases and adds a + before LNA bases (upper cased bases in OD2)
 
     Args:
-        iterable (list | tuple): A list/tuple to look backward through
-        start (int): The initial index to being from
-        char (str): The character to look for the end of in the sequence
+        seq (str): Oligodesign2 sequence with/without LNAs
 
     Returns:
-        int: The index of the next point where the character is the same
-
-    Raises:
-        ValueError: If no match is found
+        str: IDT sequence
     """
-    idx = start
-    end_idx = None
-    while not end_idx and idx > 0:
-        idx -= 1
-        if iterable[idx] == char:
-            return idx + 1
+    # Already in IDT format
+    if seq.find("+") != -1:
+        print("Sequence already in IDT format")
+        return seq
+    idt_seq = []
+    for alphabet in seq:
+        assert alphabet.lower() in {"a", "c", "g", "t"}, seq
+        # Uppercase Base - LNA
+        if alphabet.upper() == alphabet:
+            alphabet = "+" + alphabet
+        # Lowercase Base
+        else:
+            alphabet = alphabet.upper()
+        idt_seq.append(alphabet)
+    return "".join(idt_seq)
 
-    raise ValueError(f"No match found looking backwards from index {start} along interable:\n{iterable}")
 
-
-def look_backward_miss(iterable: list | tuple, start: int, char: str) -> int:
+def ret_od2_repr(seq: str) -> str:
     """
-    Look behind in an iterable for the next point where a character is different
+    Return Oligodesign2 representation of an IDT sequence
+
+    Args:
+        seq (str): IDT sequence with/without LNAs
+
+    Returns:
+        str: OD2 sequence
+    """
+    is_lna = False
+    od2_seq = []
+    for i, a in enumerate(seq):
+        assert a.upper() == a, "IDT bases should be upper case"
+        # Next base is an LNA base
+        if a == "+":
+            is_lna = True
+            continue
+        if is_lna:
+            od2_seq.append(a)
+        else:
+            od2_seq.append(a.lower())
+        is_lna = False
+
+    return "".join(od2_seq)
+
+
+def smart_iter(filepath: Path) -> Iterator[str]:
+    """
+    Iterate over a file, handling gzip files automatically.
 
     Args:
         iterable (list | tuple): A list/tuple to look backward through
