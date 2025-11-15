@@ -5,6 +5,7 @@
 """
 
 import argparse
+from pathlib import Path
 
 from Bio import SeqIO
 
@@ -29,7 +30,7 @@ def main(args) -> None:
 
     if args.output:
         i = 0
-        with open(args.output, "w") as fa_file:
+        with Path(args.output).open("w", encoding="utf-8") as fa_file:
             for seq, count in window_dict.items():
                 fa_file.write(f">{i}-{count}\n")
                 fa_file.write(f"{seq}\n")
@@ -57,7 +58,7 @@ if __name__ == "__main__":
         s = assembly.SequenceAssembler()
 
         # read data
-        with open(args.fasta) as data:
+        with Path(args.fasta).open("r", encoding="utf-8") as data:
             s.read_fasta(data)
 
         # run assembly
