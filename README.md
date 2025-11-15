@@ -1,8 +1,8 @@
 # BioX MacGuffins
 
-[![forthebadge](https://forthebadge.com/images/badges/uses-python.svg)](https://www.python.org/)
-![forthebadge](https://forthebadge.com/images/badges/works-on-my-machine.svg)
-[![forthebadge](https://forthebadge.com/images/badges/60-percent-of-the-time-works-every-time.svg)](https://forthebadge.com)
+![forthebadge](https://forthebadge.com/badges/made-with-crayons.svg)
+![forthebadge](https://forthebadge.com/badges/built-with-grammas-recipe.svg)
+![forthebadge](https://forthebadge.com/images/badges/60-percent-of-the-time-works-every-time.svg)
 
 A loose collection of random scripts I've generated over the years
 
