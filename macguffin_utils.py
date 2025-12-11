@@ -64,6 +64,49 @@ def contains_n_consecutive(n: int, lst: list, sort: bool = False) -> bool:
     return False
 
 
+def extract_sample_info(filename: str) -> tuple[str, int, int]:
+    """
+    Parse a file name to derive info about the samplename, read pair and lane
+
+    Function expects file name to be in reasonable format with different designators separated by underscores.
+
+    ABCRUN123_L001_R1_001.fastq.gz
+    DE-F-456_R2_L004.fastq
+
+    Args:
+        filename (str): Name of input file
+
+    Returns:
+        tuple[str, int, int]
+        - Sample ID
+        - Read pair number
+        - Lane number
+    Raises:
+        ValueError: If the provided filename has spaces in it
+    """
+    if " " in filename:
+        raise ValueError(f"I will not work with files that contain spaces, on principal. ({filename=})")
+
+    sample_name = ""
+    read_num = 0
+    lane_num = 0
+
+    components = filename.split("_")
+    sample_name = components[0]
+    for comp in components[1:]:
+        if comp.startswith(("l", "L")):
+            lane_num = int(comp.strip("lL"))
+        elif comp.startswith(("R", "r")):
+            read_num = int(comp.strip("Rr"))
+
+    if lane_num not in range(1, 9):
+        raise ValueError(f"An unexpected lane number was detected for {filename}: {lane_num}")
+    if read_num not in {1, 2}:
+        raise ValueError(f"Weird read number ({read_num}) for {filename}. Reads must be either 1 or 2")
+
+    return sample_name, read_num, lane_num
+
+
 def look_backward_match(iterable: list | tuple, start: int, char: str) -> int:
     """
     Look behind in an iterable for the next point where a character is the same
