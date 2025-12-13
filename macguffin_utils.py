@@ -30,6 +30,27 @@ WOBBLE_BASES = {
 }
 
 
+def collect_fastqs(directory: Path) -> list[Path]:
+    """
+    Collect all fastq and fastq.gz files in a directory and return as a dictionary of samples
+
+    Args:
+        directory (Path): Directory to search
+
+    Returns:
+        list[Path]: List of fastq and fastq.gz files
+    """
+    fastq_files = []
+    for file in directory.iterdir():
+        if file.suffix in {".fastq", ".fq"} or file.suffixes == [".fastq", ".gz"] or file.suffixes == [".fq", ".gz"]:
+            fastq_files.append(file)
+
+    if not fastq_files:
+        raise FileNotFoundError(f"No fastq files found in {directory}")
+
+    return fastq_files
+
+
 def contains_n_consecutive(n: int, lst: list, sort: bool = False) -> bool:
     """
     Check if an integer list contains n or more consecutive numbers
