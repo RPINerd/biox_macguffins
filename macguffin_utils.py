@@ -98,7 +98,7 @@ def extract_sample_info(filename: str) -> tuple[str, int, int]:
         filename (str): Name of input file
 
     Returns:
-        tuple[str, int, int]
+        Sample Info (tuple[str, int, int])
         - Sample ID
         - Read pair number
         - Lane number
