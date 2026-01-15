@@ -130,9 +130,12 @@ def subseq_search(records: Generator[SeqRecord], subseqs: list[str]) -> None:
         if record.id is None:
             continue  # Skip records without an id
 
+        if not record.seq:
+            logging.warning(f"Record {record.id} does not appear to have a sequence ({record.seq=})")
+
         nohit = True
         for subseq in subseqs:
-            regex: re.Match | None = re.search(subseq, record.seq)
+            regex: re.Match | None = re.search(subseq, str(record.seq))
             if regex:
                 nohit = False
                 try:
@@ -147,11 +150,11 @@ def subseq_search(records: Generator[SeqRecord], subseqs: list[str]) -> None:
 
     with Path.open(hit_file, "w") as hf:
         for query_seq, record_list in hit_dict.items():
-            hf.write(f"{query_seq}|{",".join([record.id for record in record_list])}\n")
+            hf.write(f"{query_seq}|{",".join([str(record.id) for record in record_list])}\n")
     logging.info("Primer Report Written..")
 
     with Path.open(nohit_file, "w") as nhf:
-        nhf.write("\n".join([record.id for record in nohit_records]))
+        nhf.write("\n".join([str(record.id) for record in nohit_records]))
     logging.info("Non-Primed Sequences Written..")
 
     avg_pos = sum(loc) / len(loc)
