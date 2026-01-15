@@ -9,7 +9,7 @@ import os
 import re
 from pathlib import Path
 
-from macguffin_utils import collect_fastqs
+from ..macguffins.macguffin_utils import collect_fastqs
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -53,14 +53,14 @@ def main(args: argparse.Namespace) -> None:
 
     for file in fastqs:
         # TODO set to be universal
-        file_info = re.match(r"(MMV2-R[0-9]{1,2}_S[0-9]{1,2}_L00[1234]_R)([12])(_001.fastq).gz", file)
+        file_info = re.match(r"(MMV2-R[0-9]{1,2}_S[0-9]{1,2}_L00[1234]_R)([12])(_001.fastq).gz", file.name)
 
         if not file_info:
             continue
 
-        sample = file_info.group(1)
-        read = file_info.group(2)
-        suffix = file_info.group(3)
+        sample: str = file_info.group(1)
+        read: str = file_info.group(2)
+        suffix: str = file_info.group(3)
 
         if read == "2":
             continue

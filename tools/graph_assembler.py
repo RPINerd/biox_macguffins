@@ -1,10 +1,9 @@
 """
-Problem of assembling the original chromosome (sequence) from
-its multiple fragments (reads) is represented with a graph,
-where vertices are individual reads and edges are overlaps
-between reads. The assembly of the original sequence
-is equivalent to finding such a path through the graph
-that each read is only used once. The path is found using
+Graph approach to read assembly
+
+Problem of assembling the original chromosome (sequence) from its multiple fragments (reads) is represented with a graph,
+where vertices are individual reads and edges are overlaps between reads. The assembly of the original sequence
+is equivalent to finding such a path through the graph that each read is only used once. The path is found using
 the Depth First Search (DFS) algorithm.
 """
 

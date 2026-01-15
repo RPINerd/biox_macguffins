@@ -9,7 +9,7 @@ from pathlib import Path
 
 from Bio import SeqIO
 
-import assembly
+from tools import graph_assembler
 
 
 def main(args) -> None:
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.assembly:
-        s = assembly.SequenceAssembler()
+        s = graph_assembler.SequenceAssembler()
 
         # read data
         with Path(args.fasta).open("r", encoding="utf-8") as data:

@@ -7,7 +7,6 @@
 from collections.abc import Generator
 
 from Bio.SeqRecord import SeqRecord
-
 from configs import MIN_LENGTH_COMPLEXITY
 
 
@@ -38,6 +37,9 @@ def filter_complexity(
         Returns:
             bool: True if the read is low-complexity
         """
+        if not record.seq:
+            print(f"Record {record.id} does not appear to have a sequence ({record.seq=}). Skipping...")
+            return True
         seq_len = len(record.seq)
         if seq_len <= MIN_LENGTH_COMPLEXITY:
             return True

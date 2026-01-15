@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 cur_clst = ""
-clusters = {}
+clusters: dict[str, list[str]] = {}
 first = True
 clst_file = Path(sys.argv[0])
 if not clst_file.exists():
@@ -28,14 +28,21 @@ with Path.open(clst_file) as infile:
             clusters[cur_clst] = []
 
         else:
-            reg = r">(chr.+:[0-9]+-[0-9]+)\.\."
-            clusters[cur_clst].append(re.search(reg, line).group(1))
+            regex = r">(chr.+:[0-9]+-[0-9]+)\.\."
+            hit = re.search(regex, line)
+            if not hit:
+                print(f"Line {line} does not appear to have expected structure")
+                continue
+            region = hit.group(1)
+            clusters[cur_clst].append(region)
 
 
 print("Size of clusters: " + str(len(clusters)) + "\n")
 
-triples = []
-remainder = []
+triples: list = []
+remainder: list = []
+triples_file: Path = Path("triples.txt")
+remainder_file: Path = Path("remainder.txt")
 
 for key in clusters.items():
     if len(clusters[key]) == 3:
@@ -48,10 +55,10 @@ for key in clusters.items():
             for hit in clusters[key]:
                 clstr_out.write(str(hit) + "\n")
 
-with Path.open("triples.txt", "w") as t_file:
+with triples_file.open("w", encoding="utf-8") as t_file:
     for hit in triples:
         t_file.write(str(hit) + "\n")
 
-with Path.open("remainder.txt", "w") as r_file:
+with remainder_file.open("w", encoding="utf-8") as r_file:
     for hit in remainder:
         r_file.write(str(hit) + "\n")
