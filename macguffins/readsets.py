@@ -43,7 +43,7 @@ def filter_complexity(
         seq_len = len(record.seq)
         if seq_len <= MIN_LENGTH_COMPLEXITY:
             return True
-        base_counts = {base: record.seq.count(base) for base in ["A", "T", "C", "G", "N"]}
+        base_counts: dict[str, int] = {base: record.seq.count(base) for base in ["A", "T", "C", "G", "N"]}
         for _, count in base_counts.items():
             if count >= (seq_len * 0.5):
                 return True
