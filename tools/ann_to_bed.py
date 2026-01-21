@@ -15,7 +15,7 @@
 import sys
 from pathlib import Path
 
-with Path.open(sys.argv[1], "r") as ref_file, Path.open("out.bed", "w") as output:
+with Path(sys.argv[1]).open("r", encoding="utf-8") as ref_file, Path("out.bed", "w").open("w", encoding="utf-8") as output:
     for line in ref_file:
         columns = line.split("\t")
 

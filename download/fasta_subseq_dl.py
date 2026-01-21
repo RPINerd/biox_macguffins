@@ -19,7 +19,7 @@ logging.basicConfig(
     format=("%(asctime)s | %(levelname)-7s | %(module)-10s | %(lineno)-4d | %(message)s"),
     datefmt="%H:%M:%S"
 )
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 Entrez.email = "rpinerd@gmail.com"
 
