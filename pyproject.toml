@@ -1,9 +1,9 @@
 [project]
 name = "biox-macguffins"
-version = "1.6.0"
+version = "1.7.0"
 description = "Personal collection of Bioinformatics tools and scripts."
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 dependencies = [
     "biopython>=1.86",
 ]
