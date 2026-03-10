@@ -18,15 +18,35 @@ def open_fastq(path: Path, mode: str = "rt") -> IO[Any] | gzip.GzipFile:
     """Open a FASTQ file, handling gzip if needed."""
     if path.suffix == ".gz":
         return gzip.open(path, "rt")
-    return Path.open(path, mode)
+    return path.open(mode)
 
 
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
-    parser = argparse.ArgumentParser(description="Extract index sequences from paired FASTQ files.")
-    parser.add_argument("-r", "--read_file", type=Path, required=True, help="Path to R1 FASTQ file (can be .gz)")
-    parser.add_argument("-1", "--index_1", type=Path, required=False, help="Output path for I1 FASTQ file")
-    parser.add_argument("-2", "--index_2", type=Path, required=False, help="Output path for I2 FASTQ file")
+    parser = argparse.ArgumentParser(
+        description="Extract index sequences from paired FASTQ files."
+    )
+    parser.add_argument(
+        "-r",
+        "--read_file",
+        type=Path,
+        required=True,
+        help="Path to R1 FASTQ file (can be .gz)",
+    )
+    parser.add_argument(
+        "-1",
+        "--index_1",
+        type=Path,
+        required=False,
+        help="Output path for I1 FASTQ file",
+    )
+    parser.add_argument(
+        "-2",
+        "--index_2",
+        type=Path,
+        required=False,
+        help="Output path for I2 FASTQ file",
+    )
     return parser.parse_args()
 
 
@@ -39,8 +59,11 @@ def main(read_file: Path, i1_file: Path, i2_file: Path) -> None:
         i1_path: Output path for I1 FASTQ file
         i2_path: Output path for I2 FASTQ file
     """
-    with open_fastq(read_file) as r1_handle, \
-        open_fastq(i1_file, "wt") as i1_handle, open_fastq(i2_file, "wt") as i2_handle:
+    with (
+        open_fastq(read_file) as r1_handle,
+        open_fastq(i1_file, "wt") as i1_handle,
+        open_fastq(i2_file, "wt") as i2_handle,
+    ):
         for rec in SeqIO.parse(r1_handle, "fastq"):
             # Extract index from read id (assumes Illumina format: ...:INDEX1+INDEX2)
             rec_id_parts: list[str] = rec.id.split(":")
@@ -55,7 +78,9 @@ def main(read_file: Path, i1_file: Path, i2_file: Path) -> None:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s"
+    )
     args = parse_args()
     read_file = Path(args.read_file)
     if not args.index_1 or not args.index_2:
@@ -67,8 +92,12 @@ if __name__ == "__main__":
     else:
         index_file_1 = Path(args.index_1)
         index_file_2 = Path(args.index_2)
-    logging.info(f"Extracting indices from {read_file} to {index_file_1} and {index_file_2}")
+    logging.info(
+        f"Extracting indices from {read_file} to {index_file_1} and {index_file_2}"
+    )
     assert index_file_1 != index_file_2, "I1 and I2 output files must be different!"
-    assert not index_file_1.exists() and not index_file_2.exists(), "I1/I2 output files must not already exist!"
+    assert not index_file_1.exists() and not index_file_2.exists(), (
+        "I1/I2 output files must not already exist!"
+    )
     main(read_file, index_file_1, index_file_2)
     logging.info(f"Index extraction complete: {index_file_1}, {index_file_2}")

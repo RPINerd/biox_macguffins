@@ -1,7 +1,7 @@
 """
-    BLAST Tools | RPINerd, 05/20/21
+BLAST Tools | RPINerd, 05/20/21
 
-    Tools for manipulating/working with blast data
+Tools for manipulating/working with blast data
 """
 
 import argparse
@@ -30,6 +30,12 @@ def self_ref_remove(in_lines: list[str]) -> list[str]:
             print("Removing self hits.. " + str(current_prog) + "%", end="\r")
 
         hit = re.match(r_str, line)
+        if hit is None:
+            print(
+                f"Line {line} does not appear to have expected structure! Skipping..."
+            )
+            continue
+
         if hit.group(1) == hit.group(2):
             next
         else:
@@ -45,18 +51,18 @@ def pick_best(in_lines: list[str]) -> list[str]:
     return out
 
 
-def write_output(out_lines: list[str], out_file: str) -> None:
+def write_output(out_lines: list[str], out_file: Path) -> None:
     """
     Given the output lines and file, write the output
 
     Args:
         out_lines (list[str]): List of lines to write to the output file
-        out_file (str): Path to the output file
+        out_file (Path): Path to the output file
 
     Returns:
         None
     """
-    with Path.open(out_file, "w") as out:
+    with out_file.open("w") as out:
         for line in out_lines:
             out.write(str(line))
 
@@ -80,8 +86,16 @@ if __name__ == "__main__":
     # Argument parsing
     parser = argparse.ArgumentParser(description="")
     parser.add_argument("-i", "--input", help="Input file", required=True)
-    parser.add_argument("-v", "--verbose", help="Lots of status messages", action="store_true")
-    parser.add_argument("-o", "--output", help="Designates a user-defined output file", default="output.txt")
+    parser.add_argument(
+        "-v", "--verbose", help="Lots of status messages", action="store_true"
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        help="Designates a user-defined output file",
+        type=Path,
+        default=Path("output.txt"),
+    )
     parser.add_argument("--trimselfhits", action="store_true")
     parser.add_argument("--pickbesthit", action="store_true")
     args = parser.parse_args()

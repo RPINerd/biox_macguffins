@@ -1,15 +1,15 @@
 """
-    CutAdapt on Directory | RPINerd, 01/18/25
+CutAdapt on Directory | RPINerd, 01/18/25
 
-    Tiny wrapper to run a cutadapt command, only for a very specific instance at this point
+Tiny wrapper to run a cutadapt command, only for a very specific instance at this point
 """
 
 import argparse
-import os
 import re
+import subprocess
 from pathlib import Path
 
-from ..macguffins.macguffin_utils import collect_fastqs
+from macguffins.macguffin_utils import collect_fastqs
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -23,7 +23,7 @@ def parse_arguments() -> argparse.Namespace:
         "--directory",
         type=Path,
         required=True,
-        help="Directory containing fastq files"
+        help="Directory containing fastq files",
     )
 
     parser.add_argument(
@@ -31,7 +31,7 @@ def parse_arguments() -> argparse.Namespace:
         "--adapters",
         type=Path,
         required=True,
-        help="Fasta file of adapter sequences to trim"
+        help="Fasta file of adapter sequences to trim",
     )
 
     args = parser.parse_args()
@@ -53,7 +53,10 @@ def main(args: argparse.Namespace) -> None:
 
     for file in fastqs:
         # TODO set to be universal
-        file_info = re.match(r"(MMV2-R[0-9]{1,2}_S[0-9]{1,2}_L00[1234]_R)([12])(_001.fastq).gz", file.name)
+        file_info = re.match(
+            r"(MMV2-R[0-9]{1,2}_S[0-9]{1,2}_L00[1234]_R)([12])(_001.fastq).gz",
+            file.name,
+        )
 
         if not file_info:
             continue
@@ -74,15 +77,39 @@ def main(args: argparse.Namespace) -> None:
         trimmed_r1 = "trimmed_" + sample + str(read) + suffix
         trimmed_r2 = "trimmed_" + sample + "2" + suffix
 
-        header = 'echo "' + sample + '" >> reports.tsv'
-        os.system(header)
-        cut_cmd = f"cutadapt -j 12 --report=minimal -n 3 -m 25 -a file:{adapters} -A file:{adapters}    \
-            --too-short-output {short_r1} --too-short-paired-output {short_r2} --pair-filter=first      \
-            -o {trimmed_r1} -p {trimmed_r2} {file} {paired_read} >> reports.tsv"
+        with open("reports.tsv", "a") as reports:
+            reports.write(sample + "\n")
 
-        print("cutadapt:\n" + cut_cmd + "\n")
+        cut_cmd = [
+            "cutadapt",
+            "-j",
+            "12",
+            "--report=minimal",
+            "-n",
+            "3",
+            "-m",
+            "25",
+            "-a",
+            f"file:{adapters}",
+            "-A",
+            f"file:{adapters}",
+            "--too-short-output",
+            short_r1,
+            "--too-short-paired-output",
+            short_r2,
+            "--pair-filter=first",
+            "-o",
+            trimmed_r1,
+            "-p",
+            trimmed_r2,
+            str(file),
+            paired_read,
+        ]
 
-        os.system(cut_cmd)
+        print("cutadapt:\n" + " ".join(cut_cmd) + "\n")
+
+        with open("reports.tsv", "a") as reports:
+            subprocess.run(cut_cmd, stdout=reports, check=True)
 
 
 if __name__ == "__main__":

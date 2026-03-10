@@ -1,7 +1,7 @@
 """
-    cd-hit Cluster Splitter | RPINerd, 01/18/25
+cd-hit Cluster Splitter | RPINerd, 01/18/25
 
-    A cleanup script to break down output from cd-hit program
+A cleanup script to break down output from cd-hit program
 """
 
 import re
@@ -11,7 +11,7 @@ from pathlib import Path
 cur_clst = ""
 clusters: dict[str, list[str]] = {}
 first = True
-clst_file = Path(sys.argv[0])
+clst_file = Path(sys.argv[1])
 if not clst_file.exists():
     raise FileNotFoundError(f"Cluster file {clst_file} does not exist!")
 
@@ -19,12 +19,12 @@ with Path.open(clst_file) as infile:
     for line in infile:
         if first:
             first = False
-            cur_clst = line.strip(">")
+            cur_clst = line.strip().lstrip(">").strip()
             clusters[cur_clst] = []
             continue
 
         if line.startswith(">"):
-            cur_clst = line.strip(">")
+            cur_clst = line.strip().lstrip(">").strip()
             clusters[cur_clst] = []
 
         else:
@@ -44,13 +44,15 @@ remainder: list = []
 triples_file: Path = Path("triples.txt")
 remainder_file: Path = Path("remainder.txt")
 
-for key in clusters.items():
+for key in clusters:
     if len(clusters[key]) == 3:
         triples.extend(clusters[key])
     elif len(clusters[key]) <= 2:
         remainder.extend(clusters[key])
     else:
-        clstr_out_name = Path(clst_file).parent / (str(key).replace(" ", "_").strip() + ".txt")
+        clstr_out_name = Path(clst_file).parent / (
+            str(key).replace(" ", "_").strip() + ".txt"
+        )
         with Path.open(clstr_out_name, "w") as clstr_out:
             for hit in clusters[key]:
                 clstr_out.write(str(hit) + "\n")

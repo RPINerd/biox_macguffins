@@ -1,7 +1,8 @@
 """
-    Program | RPINerd, 01/21/26
+Program | RPINerd, 01/21/26
 
-    Description for program
+Expand BED regions to a minimum length. For example, if a region is 100bp long and the user requests a minimum length of 200bp, this program will expand the region to 150bp on either side (if possible) to reach the minimum length.
+If the region is already at least the minimum length, it will be left unchanged.
 """
 
 import argparse
@@ -10,8 +11,10 @@ from pathlib import Path
 
 logging.basicConfig(
     level=logging.DEBUG,
-    format=("%(asctime)s | %(levelname)-7s | %(module)-10s | %(lineno)-4d | %(message)s"),
-    datefmt="%H:%M:%S"
+    format=(
+        "%(asctime)s | %(levelname)-7s | %(module)-10s | %(lineno)-4d | %(message)s"
+    ),
+    datefmt="%H:%M:%S",
 )
 logger = logging.getLogger(__name__)
 
@@ -19,17 +22,10 @@ logger = logging.getLogger(__name__)
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-i",
-        "--input",
-        type=Path,
-        required=True,
-        help="Input BED file to expand"
+        "-i", "--input", type=Path, required=True, help="Input BED file to expand"
     )
     parser.add_argument(
-        "-n",
-        "--num",
-        type=int,
-        help="Expand all regions to <number> minimum length"
+        "-n", "--num", type=int, help="Expand all regions to <number> minimum length"
     )
     args = parser.parse_args()
 
@@ -50,8 +46,11 @@ def expand(start: int, stop: int, target: int) -> tuple[int, int]:
 
 
 def main(input: Path, minimum: int) -> None:
-    expanded = input.parent / f"{input.name.split(".")[0]}_expanded.bed"
-    with input.open("r", encoding="utf-8") as in_file, expanded.open("w", encoding="utf-8") as ex_file:
+    expanded = input.parent / f"{input.name.split('.')[0]}_expanded.bed"
+    with (
+        input.open("r", encoding="utf-8") as in_file,
+        expanded.open("w", encoding="utf-8") as ex_file,
+    ):
         for line in in_file:
             cols = line.strip().split()
             id = str(cols[0])
