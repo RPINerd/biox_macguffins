@@ -4,13 +4,13 @@
     Collection of very basic utilities for use in other scripts.
 """
 import gzip
-from collections.abc import Iterator
+import logging
+from collections.abc import Generator, Iterator
 from pathlib import Path
 from typing import TextIO
-from Bio.SeqRecord import SeqRecord
-from Bio import SeqIO
-from collections.abc import Generator
 
+from Bio import SeqIO
+from Bio.SeqRecord import SeqRecord
 
 RNA_TRANSLATE = str.maketrans("AUGCaugc", "TACGtacg")
 RNA_CONVERT = str.maketrans("Uu", "Tt")
@@ -33,6 +33,13 @@ WOBBLE_BASES = {
     "D": ["G", "A", "T"],       # not C
     "N": ["G", "A", "C", "T"],  # aNy
 }
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format=("%(asctime)s | %(levelname)-7s | %(module)-10s | %(lineno)-4d | %(message)s"),
+    datefmt="%H:%M:%S"
+)
+logger = logging.getLogger(__name__)
 
 
 def collect_fastqs(directory: Path) -> list[Path]:
@@ -72,7 +79,7 @@ def collect_fastq_pairs(directory: Path) -> dict[str, tuple[Path, Path]]:
     fastq_files = collect_fastqs(directory)
     sample_dict: dict[str, list[Path | None]] = {}
     for file in fastq_files:
-        sample_name, read_num, _ = extract_sample_info(file.name)
+        sample_name, read_num, _ = extract_sample_info(file)
         if sample_name not in sample_dict:
             sample_dict[sample_name] = [None, None]
         if read_num == 1:
@@ -123,7 +130,7 @@ def contains_n_consecutive(n: int, lst: list, sort: bool = False) -> bool:
     return False
 
 
-def extract_sample_info(filename: str) -> tuple[str, int, int]:
+def extract_sample_info(filename: Path) -> tuple[str, int, int]:
     """
     Parse a file name to derive info about the samplename, read pair and lane
 
@@ -133,7 +140,7 @@ def extract_sample_info(filename: str) -> tuple[str, int, int]:
     DE-F-456_R2_L004.fastq
 
     Args:
-        filename (str): Name of input file
+        filename (Path): Input file path
 
     Returns:
         Sample Info (tuple[str, int, int])
@@ -143,14 +150,19 @@ def extract_sample_info(filename: str) -> tuple[str, int, int]:
     Raises:
         ValueError: If the provided filename has spaces in it
     """
-    if " " in filename:
+    if " " in filename.name:
         raise ValueError(f"I will not work with files that contain spaces, on principal. ({filename=})")
 
     sample_name = ""
     read_num = 0
-    lane_num = 0
+    lane_num = 1
 
-    components = filename.split("_")
+    name_witout_suffixes = filename.stem
+    for suffix in filename.suffixes:
+        name_witout_suffixes = name_witout_suffixes.removesuffix(suffix)
+    components = name_witout_suffixes.split("_")
+
+    logger.debug(f"Extracting sample info from {filename.name} with components {components}")
     sample_name = components[0]
     for comp in components[1:]:
         if comp.startswith(("l", "L")):
@@ -380,7 +392,7 @@ def smart_open(filepath: Path) -> TextIO:
     return filepath.open("r", encoding="utf-8")
 
 
-def smart_fq_zip(file_a: Path, file_b: Path) -> tuple[Generator[SeqRecord], Generator[SeqRecord]]:
+def smart_fq_zip(file_a: Path, file_b: Path) -> Generator[tuple[SeqRecord, SeqRecord]]:
     """
     Zip-like function that yields iterators of SeqRecords from two input fastq files
 
@@ -389,9 +401,8 @@ def smart_fq_zip(file_a: Path, file_b: Path) -> tuple[Generator[SeqRecord], Gene
         file_b (Path): Fastq file 2
 
     Yields:
-        Tuple of 2 iterators of Biopython SeqRecords
+        Tuple of 2 Biopython SeqRecords
     """
-    records_a: Generator[SeqRecord] = SeqIO.parse(file_a, "fastq")
-    records_b: Generator[SeqRecord] = SeqIO.parse(file_b, "fastq")
-        for record_a, record_b in zip(records_a, records_b):
-            yield record_a, record_b
+    records_a: Generator[SeqRecord] = SeqIO.parse(smart_open(file_a), "fastq")
+    records_b: Generator[SeqRecord] = SeqIO.parse(smart_open(file_b), "fastq")
+    yield from zip(records_a, records_b)
