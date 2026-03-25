@@ -7,10 +7,15 @@ import gzip
 from collections.abc import Iterator
 from pathlib import Path
 from typing import TextIO
+from Bio.SeqRecord import SeqRecord
+from Bio import SeqIO
+from collections.abc import Generator
+
 
 RNA_TRANSLATE = str.maketrans("AUGCaugc", "TACGtacg")
 RNA_CONVERT = str.maketrans("Uu", "Tt")
 DNA_TRANSLATE = str.maketrans("ATCGatcg", "TAGCtagc")
+DNAN_TRANSLATE = str.maketrans("ATCGNatcgn", "TAGCNtagcn")
 IUPAC_TRANSLATE = str.maketrans(
     "ATGCRYMKSWHBVDNatgcrymkswhbvdn",
     "TACGYRKMSWDVBHNtacgyrkmswdvbhn"
@@ -32,7 +37,7 @@ WOBBLE_BASES = {
 
 def collect_fastqs(directory: Path) -> list[Path]:
     """
-    Collect all fastq and fastq.gz files in a directory and return as a dictionary of samples
+    Collect all fastq and fastq.gz files in a directory and return list of file paths
 
     Args:
         directory (Path): Directory to search
@@ -49,6 +54,39 @@ def collect_fastqs(directory: Path) -> list[Path]:
         raise FileNotFoundError(f"No fastq files found in {directory}")
 
     return fastq_files
+
+
+def collect_fastq_pairs(directory: Path) -> dict[str, tuple[Path, Path]]:
+    """
+    Collect all fastq and fastq.gz files in a directory and return as a dictionary of samples with paired-end files
+
+    Args:
+        directory (Path): Directory to search
+
+    Returns:
+        dict[str, tuple[Path, Path]]: Dictionary mapping sample names to tuples of paired-end fastq files
+
+    Raises:
+        ValueError: If any pairs are missing a read
+    """
+    fastq_files = collect_fastqs(directory)
+    sample_dict: dict[str, list[Path | None]] = {}
+    for file in fastq_files:
+        sample_name, read_num, _ = extract_sample_info(file.name)
+        if sample_name not in sample_dict:
+            sample_dict[sample_name] = [None, None]
+        if read_num == 1:
+            sample_dict[sample_name][0] = file
+        elif read_num == 2:
+            sample_dict[sample_name][1] = file
+
+    # Convert lists to tuples and check for missing pairs
+    for sample_name, files in sample_dict.items():
+        if None in files:
+            raise ValueError(f"Missing pair for sample {sample_name}: {files}")
+        sample_dict[sample_name] = tuple(files)
+
+    return sample_dict
 
 
 def contains_n_consecutive(n: int, lst: list, sort: bool = False) -> bool:
@@ -294,6 +332,19 @@ def ret_od2_repr(seq: str) -> str:
     return "".join(od2_seq)
 
 
+def revcomp(seq: str) -> str:
+    """
+    Reverse complement a sequence
+
+    Args:
+        seq (str): Genetic sequence
+
+    Returns:
+        str: Reverse complemented sequence
+    """
+    return seq.translate(DNAN_TRANSLATE)[::-1]
+
+
 def smart_iter(filepath: Path) -> Iterator[str]:
     """
     Iterate over a file, handling gzip files automatically.
@@ -327,3 +378,20 @@ def smart_open(filepath: Path) -> TextIO:
     if filepath.suffix == ".gz":
         return gzip.open(filepath, "rt")
     return filepath.open("r", encoding="utf-8")
+
+
+def smart_fq_zip(file_a: Path, file_b: Path) -> tuple[Generator[SeqRecord], Generator[SeqRecord]]:
+    """
+    Zip-like function that yields iterators of SeqRecords from two input fastq files
+
+    Args:
+        file_a (Path): Fastq file 1
+        file_b (Path): Fastq file 2
+
+    Yields:
+        Tuple of 2 iterators of Biopython SeqRecords
+    """
+    records_a: Generator[SeqRecord] = SeqIO.parse(file_a, "fastq")
+    records_b: Generator[SeqRecord] = SeqIO.parse(file_b, "fastq")
+        for record_a, record_b in zip(records_a, records_b):
+            yield record_a, record_b
