@@ -19,12 +19,21 @@ Usage:
 
 import argparse
 import logging
+import sys
 from pathlib import Path
 
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 
-from macguffins.macguffin_utils import collect_fastq_pairs, revcomp, smart_fq_zip
+try:
+    from macguffins.macguffin_utils import collect_fastq_pairs, revcomp, smart_fq_zip
+except ModuleNotFoundError as exc:
+    if exc.name != "macguffins":
+        raise
+    repo_root = Path(__file__).resolve().parents[1]
+    if str(repo_root) not in sys.path:
+        sys.path.insert(0, str(repo_root))
+    from macguffins.macguffin_utils import collect_fastq_pairs, revcomp, smart_fq_zip
 
 logging.basicConfig(
     level=logging.INFO,
@@ -124,7 +133,7 @@ def build_kmer_set(fastas: list[Path], k: int) -> set[str]:
         for record in SeqIO.parse(fasta, "fasta"):
             n = len(record.seq)
             for i in range(n - k + 1):
-                kmer = record.seq[i : i + k]
+                kmer = str(record.seq[i : i + k])
                 if "N" not in kmer:
                     kmers.add(kmer)
                     kmers.add(revcomp(kmer))
@@ -132,7 +141,7 @@ def build_kmer_set(fastas: list[Path], k: int) -> set[str]:
 
 
 def read_has_kmers(
-    sequence: str,
+    record: SeqRecord,
     kmer_set: set[str],
     k: int,
     max_mismatches: int,
@@ -150,7 +159,7 @@ def read_has_kmers(
     Returns:
         True if any k-mer from the read is present in kmer_set.
     """
-    seq = sequence.upper()
+    seq = str(record.seq).upper()
     n = len(seq)
     for i in range(n - k + 1):
         window = seq[i : i + k]
@@ -220,10 +229,10 @@ def scan_fastq_pair(
     for record_1, record_2 in smart_fq_zip(r1_path, r2_path):
         total_reads += 2  # one R1 + one R2 per pair
 
-        r1_fus_1 = read_has_kmers(record_1.seq, fusion_a_kmers, k, max_mismatches)
-        r1_fus_2 = read_has_kmers(record_1.seq, fusion_b_kmers, k, max_mismatches)
-        r2_fus_1 = read_has_kmers(record_2.seq, fusion_a_kmers, k, max_mismatches)
-        r2_fus_2 = read_has_kmers(record_2.seq, fusion_b_kmers, k, max_mismatches)
+        r1_fus_1 = read_has_kmers(record_1, fusion_a_kmers, k, max_mismatches)
+        r1_fus_2 = read_has_kmers(record_1, fusion_b_kmers, k, max_mismatches)
+        r2_fus_1 = read_has_kmers(record_2, fusion_a_kmers, k, max_mismatches)
+        r2_fus_2 = read_has_kmers(record_2, fusion_b_kmers, k, max_mismatches)
 
         # Spanning: individual read holds k-mers from both genes
         r1_spanning = r1_fus_1 and r1_fus_2
