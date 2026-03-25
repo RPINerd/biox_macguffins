@@ -21,8 +21,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-Entrez.email = "rpinerd@gmail.com"
-
 
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments"""
