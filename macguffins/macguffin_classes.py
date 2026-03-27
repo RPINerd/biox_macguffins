@@ -50,12 +50,12 @@ class RunCollection:
         """Collects samples from the run directory"""
         fastq_files = list(dir.glob("*.fastq")) + list(dir.glob("*.fastq.gz"))
         for fq in fastq_files:
-            sample_name, read_num, _ = extract_sample_info(fq.name)
+            sample_name, read_num, _ = extract_sample_info(fq)
             if sample_name not in self.samples:
                 self.samples[sample_name] = RunSet(sample_name)
             if read_num == 1:
                 self.samples[sample_name].read_1_fastqs.append(fq)
-            elif read_num == 2:
+            elif read_num == 2:  #noqa
                 self.samples[sample_name].read_2_fastqs.append(fq)
 
     def merge_all_samples(self) -> None:

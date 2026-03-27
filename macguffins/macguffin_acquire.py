@@ -5,10 +5,13 @@
 """
 
 import logging
+from typing import TYPE_CHECKING
 
 import requests
 from Bio import Entrez, SeqIO
-from Bio.SeqRecord import SeqRecord
+
+if TYPE_CHECKING:
+    from Bio.SeqRecord import SeqRecord
 
 from .biopython_plus import extract_exons
 from .configs import REFSEQ_CACHE_DIR
