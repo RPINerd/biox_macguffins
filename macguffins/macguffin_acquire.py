@@ -9,8 +9,9 @@ import logging
 import requests
 from Bio import Entrez, SeqIO
 from Bio.SeqRecord import SeqRecord
-from biopython_plus import extract_exons
-from configs import REFSEQ_CACHE_DIR
+
+from .biopython_plus import extract_exons
+from .configs import REFSEQ_CACHE_DIR
 
 ENSEMBL_REST = "https://rest.ensembl.org"
 
@@ -94,6 +95,7 @@ def fetch_exons(accession: str) -> list[SeqRecord]:
     """
     cache_file = REFSEQ_CACHE_DIR / f"{accession.replace('.', '_')}.gb"
     if cache_file.exists():
+        logger.debug(f"Cache hit for {accession}, loading from {cache_file}")
         with cache_file.open("r") as f:
             record: SeqRecord = SeqIO.read(f, "genbank")
         return extract_exons(record)
