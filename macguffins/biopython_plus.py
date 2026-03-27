@@ -27,16 +27,20 @@ def extract_exons(record: SeqRecord) -> list[SeqRecord]:
         list[SeqRecord]: List of SeqRecord objects, each representing an exon sequence
     """
     exons = []
+    exon_number = 1
     for feature in record.features:
         if feature.type == "exon":
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(f"Extracting exon {exon_number} from {record.id}:\n{feature}")
             exon_seq = feature.extract(record.seq)
             if not isinstance(exon_seq, Seq):
                 logger.error(f"Failed to extract exon sequence for {record.id}, {feature}")
                 continue
             exon_record = SeqRecord(
                 exon_seq,
-                id=f"{record.id}_{feature.qualifiers.get('number', ['unknown'])[0]}",
-                description=f"Exon {feature.qualifiers.get('number', ['unknown'])[0]} from {record.id}"
+                id=f"{record.id}_{exon_number}",
+                description=f"Exon {exon_number} from {record.id}"
             )
             exons.append(exon_record)
+            exon_number += 1
     return exons
