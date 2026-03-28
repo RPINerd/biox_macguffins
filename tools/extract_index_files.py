@@ -21,7 +21,7 @@ def open_fastq(path: Path, mode: str = "rt") -> IO[Any] | gzip.GzipFile:
     return path.open(mode)
 
 
-def parse_args() -> argparse.Namespace:
+def arg_parse() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
         description="Extract index sequences from paired FASTQ files."
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s"
     )
-    args = parse_args()
+    args = arg_parse()
     read_file = Path(args.read_file)
     if not args.index_1 or not args.index_2:
         read_file_name = read_file.name

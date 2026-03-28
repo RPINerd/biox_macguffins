@@ -46,7 +46,7 @@ DEFAULT_KMER_SIZE = 20
 _DNA_BASES = ("A", "C", "G", "T")
 
 
-def parse_arguments() -> argparse.Namespace:
+def arg_parse() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
         description=__doc__,
@@ -368,5 +368,5 @@ def main(args: argparse.Namespace) -> None:
 
 
 if __name__ == "__main__":
-    args = parse_arguments()
+    args = arg_parse()
     main(args)

@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 MIN_EXON_SIMILARITY = 0.90
 
 
-def parse_arguments() -> argparse.Namespace:
+def arg_parse() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -137,5 +137,5 @@ def main(args: argparse.Namespace) -> None:
 
 
 if __name__ == "__main__":
-    args = parse_arguments()
+    args = arg_parse()
     main(args)

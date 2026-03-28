@@ -35,15 +35,15 @@ UPSTREAM_ANCHOR = 100
 DOWNSTREAM_ANCHOR = 100
 
 
-def parse_args() -> argparse.ArgumentParser:
+def arg_parse() -> argparse.Namespace:
     """Simple argument parser for the script"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-f",
         "--fasta",
-        type=str,
+        type=Path,
         help="Input fasta alignment file. First line must be reference!",
-        default="test/ref_filler.fasta",
+        default=Path("test/ref_filler.fasta"),
     )
     parser.add_argument(
         "-g",
@@ -72,9 +72,9 @@ def parse_args() -> argparse.ArgumentParser:
     parser.add_argument(
         "-o",
         "--output",
-        type=str,
+        type=Path,
         help="Output directory for expansion fasta files (Defaults to current directory)",
-        default="./",
+        default=Path("./"),
         required=False
     )
 
@@ -83,27 +83,28 @@ def parse_args() -> argparse.ArgumentParser:
 
 # TODO make sure there is more than 1 sequence
 # TODO input must be an alignment, i.e. have '-' characters
-def validate_falign(file) -> str:
-    """
-    Validate the input fasta alignment file
-    """
-    message = ""
+def validate_falign(file: Path) -> tuple[bool, str]:
+    """Validate the input fasta alignment file"""
+    message = "Validation not implemented yet"
 
-    return message
+    if file.exists() and file.is_file():
+        return False, message
+
+    return True, message
 
 
-def parse_fasta(file: str) -> dict[str, tuple[str]]:
+def parse_fasta(file: Path) -> dict[str, tuple[str]]:
     """
     Parses a fasta alignment file into a dictionary of sequences.
 
     Args:
-        file (str): Path to the fasta alignment file.
+        file (Path): Path to the fasta alignment file.
 
     Returns:
         dict[str, tuple[str]]: Dictionary of sequences with the ID as the key.
     """
     tracks = {}
-    with Path.open(file, "r") as alignment:
+    with file.open("r", encoding="utf-8") as alignment:
         lines = alignment.readlines()
 
         ref = True
@@ -161,7 +162,7 @@ def parse_refseq(ref_seq: tuple[str]) -> list[tuple[int, int]]:
     return gaps
 
 
-def generate_patch(tracks: dict[str, tuple[str]], start: int, end: int, output_dir: str, fasta_number: int) -> bool:
+def generate_patch(tracks: dict[str, tuple[str]], start: int, end: int, output_dir: Path, fasta_number: int) -> bool:
     """
     Generate a fasta file for the missing region
 
@@ -169,7 +170,7 @@ def generate_patch(tracks: dict[str, tuple[str]], start: int, end: int, output_d
         tracks (dict[str, tuple[str]]): Dictionary of sequences
         start (int): Start of the missing region
         end (int): End of the missing region
-        output_dir (str): Directory to write the fasta files to
+        output_dir (Path): Directory to write the fasta files to
         fasta_number (int): Number to append to the fasta file name
 
     Returns:
@@ -199,12 +200,13 @@ def generate_patch(tracks: dict[str, tuple[str]], start: int, end: int, output_d
             downstream_seq = downstream_seq[:downstream_cut_point]
 
         # Extract the sequence to be written to the fasta file
-        fasta_filename = f"{fasta_number}_{id.strip(">").strip()}_{upstream_start}-{downstream_end}.fasta"
+        fasta_filename = f"{fasta_number}_{id.strip('>').strip()}_{upstream_start}-{downstream_end}.fasta"
         fasta_header = f"{id.strip()}:{upstream_start}-{downstream_end}"
         fasta_seq = "".join([upstream_seq, filler_seq, downstream_seq])
 
         # Write the fasta entry to a file, if the file already exists, overwrite it
-        with Path.open(Path.joinpath(output_dir, fasta_filename), "w") as patch:
+        fasta_filepath = output_dir / fasta_filename
+        with fasta_filepath.open("w", encoding="utf-8") as patch:
             patch.write(f"{fasta_header}\n{fasta_seq}\n")
 
         return True
@@ -227,13 +229,13 @@ def main(args: argparse.Namespace) -> None:
     output_directory = args.output
 
     # Verify that the output directory exists, create it if it does not
-    if not Path.exists(output_directory):
-        Path.mkdir(output_directory, parents=True)
+    if not output_directory.exists():
+        output_directory.mkdir(parents=True)
 
     # TODO validate fasta file instead of assuming valid input
-    invalid = validate_falign(fasta_file)
+    invalid, reason = validate_falign(fasta_file)
     if invalid:
-        raise f"Invalid fasta alignment input: {invalid}"
+        raise ValueError(f"Invalid fasta alignment input: {reason}")
 
     # Extract the individual sequences as sets
     tracks = parse_fasta(fasta_file)
@@ -251,7 +253,7 @@ def main(args: argparse.Namespace) -> None:
 
 
 if __name__ == "__main__":
-    args = parse_args()
+    args = arg_parse()
 
     # Overwrite globals if provided
     REGION_SIZE = args.gap

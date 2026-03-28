@@ -44,17 +44,17 @@ remainder: list = []
 triples_file: Path = Path("triples.txt")
 remainder_file: Path = Path("remainder.txt")
 
-for key in clusters:
-    if len(clusters[key]) == 3:
-        triples.extend(clusters[key])
-    elif len(clusters[key]) <= 2:
-        remainder.extend(clusters[key])
+for key, regions in clusters.items():
+    if len(regions) == 3:  #noqa
+        triples.extend(regions)
+    elif len(regions) <= 2:  #noqa
+        remainder.extend(regions)
     else:
         clstr_out_name = Path(clst_file).parent / (
             str(key).replace(" ", "_").strip() + ".txt"
         )
-        with Path.open(clstr_out_name, "w") as clstr_out:
-            for hit in clusters[key]:
+        with clstr_out_name.open("w", encoding="utf-8") as clstr_out:
+            for hit in regions:
                 clstr_out.write(str(hit) + "\n")
 
 with triples_file.open("w", encoding="utf-8") as t_file:

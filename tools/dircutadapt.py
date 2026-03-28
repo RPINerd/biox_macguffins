@@ -12,7 +12,7 @@ from pathlib import Path
 from macguffins.macguffin_utils import collect_fastqs
 
 
-def parse_arguments() -> argparse.Namespace:
+def arg_parse() -> argparse.Namespace:
     """Parse command line arguments"""
     parser = argparse.ArgumentParser(
         description="Run cutadapt on all fastq files in a directory"
@@ -51,6 +51,10 @@ def main(args: argparse.Namespace) -> None:
     adapters = Path(args.adapters)
     fastqs = collect_fastqs(directory)
 
+    reports_file = Path("reports.tsv")
+    if reports_file.exists():
+        reports_file.unlink()
+
     for file in fastqs:
         # TODO set to be universal
         file_info = re.match(
@@ -76,9 +80,6 @@ def main(args: argparse.Namespace) -> None:
         short_r2 = "short_" + sample + "2" + suffix
         trimmed_r1 = "trimmed_" + sample + str(read) + suffix
         trimmed_r2 = "trimmed_" + sample + "2" + suffix
-
-        with open("reports.tsv", "a") as reports:
-            reports.write(sample + "\n")
 
         cut_cmd = [
             "cutadapt",
@@ -108,11 +109,12 @@ def main(args: argparse.Namespace) -> None:
 
         print("cutadapt:\n" + " ".join(cut_cmd) + "\n")
 
-        with open("reports.tsv", "a") as reports:
+        with reports_file.open("a", encoding="utf-8") as reports:
+            reports.write(sample + "\n")
             subprocess.run(cut_cmd, stdout=reports, check=True)
 
 
 if __name__ == "__main__":
-    args = parse_arguments()
+    args = arg_parse()
 
     main(args)

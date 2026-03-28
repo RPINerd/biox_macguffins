@@ -1,8 +1,12 @@
 """
-Program | RPINerd, 01/21/26
+Bed Expansion Tool | RPINerd, 01/21/26
 
-Expand BED regions to a minimum length. For example, if a region is 100bp long and the user requests a minimum length of 200bp, this program will expand the region to 150bp on either side (if possible) to reach the minimum length.
-If the region is already at least the minimum length, it will be left unchanged.
+Expand BED regions to a minimum length.
+
+E.g. chr1:400-500 -> chr1:350-550
+    100bp long region, the user requests a minimum length of 200bp:
+    This program will expand the region to 150bp on either side (if possible) to reach the minimum length.
+    If the region is already at least the minimum length, it will be left unchanged.
 """
 
 import argparse
@@ -19,7 +23,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def parse_args() -> argparse.Namespace:
+def arg_parse() -> argparse.Namespace:
+    """Parse command-line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-i", "--input", type=Path, required=True, help="Input BED file to expand"
@@ -36,6 +41,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def expand(start: int, stop: int, target: int) -> tuple[int, int]:
+    """Expand a region to a minimum length."""
     total_needed = target - abs(stop - start)
     end_split = total_needed // 2
     new_start = start - end_split
@@ -46,6 +52,7 @@ def expand(start: int, stop: int, target: int) -> tuple[int, int]:
 
 
 def main(input: Path, minimum: int) -> None:
+    """"""
     expanded = input.parent / f"{input.name.split('.')[0]}_expanded.bed"
     with (
         input.open("r", encoding="utf-8") as in_file,
@@ -63,5 +70,5 @@ def main(input: Path, minimum: int) -> None:
 
 
 if __name__ == "__main__":
-    args = parse_args()
+    args = arg_parse()
     main(args.input, args.num)

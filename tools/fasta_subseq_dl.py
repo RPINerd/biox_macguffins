@@ -8,7 +8,10 @@
 
 import argparse
 import logging
-from io import TextIOWrapper
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from io import TextIOWrapper
 from pathlib import Path
 from time import sleep
 
@@ -22,7 +25,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def parse_args() -> argparse.Namespace:
+def arg_parse() -> argparse.Namespace:
     """Parse command-line arguments"""
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", type=Path, help="Input file with Accession IDs and start/stop coordinates")
@@ -111,5 +114,5 @@ def main(input_file: Path, bed_format: bool, output_location: Path) -> None:
 
 
 if __name__ == "__main__":
-    args = parse_args()
+    args = arg_parse()
     main(args.input, args.bed, args.output)

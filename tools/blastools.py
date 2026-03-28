@@ -37,7 +37,7 @@ def self_ref_remove(in_lines: list[str]) -> list[str]:
             continue
 
         if hit.group(1) == hit.group(2):
-            next
+            _ = next
         else:
             out.append(str(line))
 
@@ -46,8 +46,10 @@ def self_ref_remove(in_lines: list[str]) -> list[str]:
 
 
 def pick_best(in_lines: list[str]) -> list[str]:
+    """"""
+    # TODO No implementation yet, just a placeholder
     out = []
-
+    out.extend(in_lines)
     return out
 
 
@@ -62,7 +64,7 @@ def write_output(out_lines: list[str], out_file: Path) -> None:
     Returns:
         None
     """
-    with out_file.open("w") as out:
+    with out_file.open("w", encoding="utf-8") as out:
         for line in out_lines:
             out.write(str(line))
 
@@ -70,7 +72,7 @@ def write_output(out_lines: list[str], out_file: Path) -> None:
 def main(args: argparse.Namespace) -> None:
     """"""
     data = []
-    with Path.open(args.input) as file:
+    with args.input.open("r", encoding="utf-8") as file:
         for line in file:
             data.append(line)
 
@@ -85,9 +87,17 @@ def main(args: argparse.Namespace) -> None:
 if __name__ == "__main__":
     # Argument parsing
     parser = argparse.ArgumentParser(description="")
-    parser.add_argument("-i", "--input", help="Input file", required=True)
     parser.add_argument(
-        "-v", "--verbose", help="Lots of status messages", action="store_true"
+        "-i",
+        "--input",
+        type=Path,
+        help="Input file",
+        required=True)
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        help="Lots of status messages",
+        action="store_true"
     )
     parser.add_argument(
         "-o",
