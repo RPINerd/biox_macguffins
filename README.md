@@ -48,7 +48,7 @@ A comprehensive collection of bioinformatics tools and scripts for sequence anal
   - Fills alignment gaps by extracting variants from aligned sequences
   - Generates subsequence FASTA files for missing regions
 
-- **[fasta/pairwise_align.py](fasta/pairwise_align.py)** - Pairwise sequence alignment
+- **[tools/pairwise_align.py](tools/pairwise_align.py)** - Pairwise sequence alignment
   - Aligns sequence pairs using Biopython
 
 - **[tools/ann_to_bed.py](tools/ann_to_bed.py)** - Format conversion
@@ -56,28 +56,39 @@ A comprehensive collection of bioinformatics tools and scripts for sequence anal
 
 ### Data Processing
 
-- **[clstr_splitter.py](clstr_splitter.py)** - CD-HIT cluster parser
+- **[tools/clstr_splitter.py](tools/clstr_splitter.py)** - CD-HIT cluster parser
   - Splits CD-HIT cluster output into individual cluster files
 
-- **[dircutadapt.py](dircutadapt.py)** - CutAdapt wrapper
+- **[tools/dircutadapt.py](tools/dircutadapt.py)** - CutAdapt wrapper
   - Batch adapter trimming for FASTQ files in a directory
 
-- **[subsample.py](subsample.py)** - Subsampling tool
+- **[tools/subsample.py](tools/subsample.py)** - Subsampling tool
   - Generates subsampled FASTQ files using SeqTK
   - Optional bulk processing from TSV file
 
-- **[fastq/extract_index_files.py](fastq/extract_index_files.py)** - Index extraction
+- **[tools/extract_index_files.py](tools/extract_index_files.py)** - Index extraction
   - Extracts index sequences from paired-end FASTQ (generates I1/I2 from R1/R2)
   - Supports gzipped input
 
-- **[download/fasta_subseq_dl.py](download/fasta_subseq_dl.py)** - Sequence download
+- **[tools/fasta_subseq_dl.py](tools/fasta_subseq_dl.py)** - Sequence download
   - Downloads FASTA subsequences from NCBI using Accession IDs and coordinates
+
+- **[tools/bed_expansion.py](tools/bed_expansion.py)** - BED region expansion
+  - Expands BED regions below a minimum length threshold symmetrically
 
 ### Miscellaneous
 
-- **[assembly.py](assembly.py)** - De Bruijn-like sequence assembly
+- **[tools/graph_assembler.py](tools/graph_assembler.py)** - De Bruijn-like sequence assembly
   - Graph-based read assembly using greedy overlap matching
   - Implements Depth-First Search path finding
+
+- **[tools/detect_fusions.py](tools/detect_fusions.py)** - Fusion read detection
+  - K-mer based detection of spanning and chimeric fusion reads in paired-end FASTQ
+  - Deduplicates k-mers shared between fusion partners to reduce false positives
+
+- **[tools/detect_tandem_repeats.py](tools/detect_tandem_repeats.py)** - Tandem repeat detection
+  - Identifies assembled contigs containing tandem repeats of a gene
+  - Fetches exon sequences from NCBI by accession and aligns against contigs
 
 ## Archive (Legacy)
 
