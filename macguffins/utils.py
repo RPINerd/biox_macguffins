@@ -5,12 +5,15 @@
 """
 import gzip
 import logging
-from collections.abc import Generator, Iterator
 from pathlib import Path
-from typing import TextIO
+from typing import TYPE_CHECKING, TextIO
 
 from Bio import SeqIO
-from Bio.SeqRecord import SeqRecord
+
+if TYPE_CHECKING:
+    from collections.abc import Generator, Iterator
+
+    from Bio.SeqRecord import SeqRecord
 
 RNA_TRANSLATE = str.maketrans("AUGCaugc", "TACGtacg")
 RNA_CONVERT = str.maketrans("Uu", "Tt")

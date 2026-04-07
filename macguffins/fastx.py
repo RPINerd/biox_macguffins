@@ -6,10 +6,13 @@
 """
 import logging
 import re
-from collections.abc import Generator
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from Bio.SeqRecord import SeqRecord
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 
 def dg_count(records: Generator[SeqRecord]) -> dict[str, int]:

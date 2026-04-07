@@ -4,10 +4,14 @@
     Differentiation from the fastaq module is that fuctions in this module should focus on operations
     which require the use of the actual read number of a record (i.e. read1, read2)
 """
-from collections.abc import Generator
+from typing import TYPE_CHECKING
 
-from Bio.SeqRecord import SeqRecord
 from configs import MIN_LENGTH_COMPLEXITY
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
+    from Bio.SeqRecord import SeqRecord
 
 
 def filter_complexity(

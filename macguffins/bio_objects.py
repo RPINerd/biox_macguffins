@@ -4,7 +4,7 @@
 import subprocess
 from pathlib import Path
 
-from macguffin_utils import extract_sample_info
+from macguffins.utils import extract_sample_info
 
 
 class Primer:
