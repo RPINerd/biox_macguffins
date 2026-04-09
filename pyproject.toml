@@ -7,13 +7,12 @@ name = "biox-macguffins"
 version = "1.8.0"
 description = "Personal collection of Bioinformatics tools and scripts."
 readme = "README.md"
-license = "GPL-3.0"
+license = "GPL-3.0-or-later"
 authors = [
     {name = "RPINerd"},
 ]
 keywords = ["bioinformatics", "genomics", "fasta", "fastq", "sequencing", "sam", "bam", "vcf", "gff"]
 classifiers = [
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.12",
