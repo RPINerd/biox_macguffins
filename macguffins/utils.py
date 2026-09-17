@@ -77,20 +77,23 @@ def collect_fastq_pairs(directory: Path) -> dict[str, tuple[Path, Path]]:
         ValueError: If any pairs are missing a read
     """
     fastq_files = collect_fastqs(directory)
-    sample_dict: dict[str, list[Path | None]] = {}
+    sample_temp_dict: dict[str, list[Path | None]] = {}
     for file in fastq_files:
         sample_name, read_num, _ = extract_sample_info(file)
-        if sample_name not in sample_dict:
-            sample_dict[sample_name] = [None, None]
+        if sample_name not in sample_temp_dict:
+            sample_temp_dict[sample_name] = [None, None]
         if read_num == 1:
-            sample_dict[sample_name][0] = file
+            sample_temp_dict[sample_name][0] = file
         elif read_num == 2:
-            sample_dict[sample_name][1] = file
+            sample_temp_dict[sample_name][1] = file
 
     # Convert lists to tuples and check for missing pairs
-    for sample_name, files in sample_dict.items():
+    sample_dict: dict[str, tuple[Path, Path]] = {}
+    for sample_name, files in sample_temp_dict.items():
         if None in files:
             raise ValueError(f"Missing pair for sample {sample_name}: {files}")
+        if len(files) > 2:
+            raise ValueError(f"Too many files for sample {sample_name}: {files}")
         sample_dict[sample_name] = tuple(files)
 
     return sample_dict

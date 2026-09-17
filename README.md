@@ -4,104 +4,51 @@
 ![forthebadge](https://forthebadge.com/badges/built-with-grammas-recipe.svg)
 ![forthebadge](https://forthebadge.com/images/badges/60-percent-of-the-time-works-every-time.svg)
 
-A comprehensive collection of bioinformatics tools and scripts for sequence analysis, quality control, and data processing.
+A collection of bioinformatics tools and scripts for sequence analysis, quality control, and data processing. Built on the back of BioPython to extend functionality and keep downstream scripting cleaner and more efficient.
 
-**Requirements:** Python 3.13+, BioPython 1.86+
+## Requirements
 
-## Core Modules
+Python >= 3.13
+BioPython >= 1.86
+
+## Modules
 
 ### Sequence Operations
 
-- **[fastx.py](fastx.py)** - FASTA/FASTQ file operations (sequence-level operations)
+- **[fastx.py](fastx.py)**
+  - FASTA/FASTQ file operations (sequence-level operations)
   - Degenerate base counting
   - Sequence validation and filtering
 
-- **[readsets.py](readsets.py)** - Read pair operations (R1/R2 aware)
+- **[readsets.py](readsets.py)**
+  - Read pair operations (R1/R2 aware)
   - Complexity filtering
   - Paired-end sequence analysis
 
-- **[sambams.py](sambams.py)** - SAM/BAM file manipulation
+- **[sambams.py](sambams.py)**
+  - SAM/BAM file manipulation
   - CIGAR string filtering
 
-- **[fastx_utils.py](macguffin_utils.py)** - Utility functions
+- **[macguffin_utils.py](macguffin_utils.py)**
+  - Utility functions
   - Sequence complement/reverse complement (DNA, RNA, IUPAC)
   - FASTA/FASTQ parsing helpers
   - File collection utilities
 
 ### Data Structures
 
-- **[macguffin_classes.py](macguffin_classes.py)** - Core classes
+- **[macguffin_classes.py](macguffin_classes.py)**
+  - Core classes
   - `Primer` - Genomic primer representation (chromosome, position, coordinates)
   - `RunCollection` - Pipeline run organization (samples, read sets)
   - `RunSet` - Paired-end read set management
 
-- **[configs.py](configs.py)** - Configuration settings
+- **[configs.py](configs.py)**
+  - Configuration settings
 
-## Tools
+### Download and Processing Tools
 
-### Sequence Analysis
-
-- **[tools/blastools.py](tools/blastools.py)** - BLAST result manipulation
-  - Self-hit removal from BLAST reports
-
-- **[tools/ref_filler.py](tools/ref_filler.py)** - Reference sequence expansion
-  - Fills alignment gaps by extracting variants from aligned sequences
-  - Generates subsequence FASTA files for missing regions
-
-- **[tools/pairwise_align.py](tools/pairwise_align.py)** - Pairwise sequence alignment
-  - Aligns sequence pairs using Biopython
-
-- **[tools/ann_to_bed.py](tools/ann_to_bed.py)** - Format conversion
-  - Converts UCSC RepMask annotation format to BED format
-
-### Data Processing
-
-- **[tools/clstr_splitter.py](tools/clstr_splitter.py)** - CD-HIT cluster parser
-  - Splits CD-HIT cluster output into individual cluster files
-
-- **[tools/dircutadapt.py](tools/dircutadapt.py)** - CutAdapt wrapper
-  - Batch adapter trimming for FASTQ files in a directory
-
-- **[tools/subsample.py](tools/subsample.py)** - Subsampling tool
-  - Generates subsampled FASTQ files using SeqTK
-  - Optional bulk processing from TSV file
-
-- **[tools/extract_index_files.py](tools/extract_index_files.py)** - Index extraction
-  - Extracts index sequences from paired-end FASTQ (generates I1/I2 from R1/R2)
-  - Supports gzipped input
-
-- **[tools/fasta_subseq_dl.py](tools/fasta_subseq_dl.py)** - Sequence download
-  - Downloads FASTA subsequences from NCBI using Accession IDs and coordinates
-
-- **[tools/bed_expansion.py](tools/bed_expansion.py)** - BED region expansion
-  - Expands BED regions below a minimum length threshold symmetrically
-
-### Miscellaneous
-
-- **[tools/graph_assembler.py](tools/graph_assembler.py)** - De Bruijn-like sequence assembly
-  - Graph-based read assembly using greedy overlap matching
-  - Implements Depth-First Search path finding
-
-- **[tools/detect_fusions.py](tools/detect_fusions.py)** - Fusion read detection
-  - K-mer based detection of spanning and chimeric fusion reads in paired-end FASTQ
-  - Deduplicates k-mers shared between fusion partners to reduce false positives
-
-- **[tools/detect_tandem_repeats.py](tools/detect_tandem_repeats.py)** - Tandem repeat detection
-  - Identifies assembled contigs containing tandem repeats of a gene
-  - Fetches exon sequences from NCBI by accession and aligns against contigs
-
-## Archive (Legacy)
-
-The [archive/](archive/) directory contains deprecated/retired tools:
-
-- `fadiff.py` - FASTA difference (superseded by standard tools)
-- `fauniq.py` - FASTA unique (superseded by standard tools)
-- `fqfilter.py` - FASTQ filtering
-- `cigar_filter.py` - CIGAR filtering (see sambams.py)
-- `map_accessiontaxid.py` - Accession to TaxID mapping
-- `taxid_annotate.py` - TaxID annotation
-- `snp_primer_validate.py` - SNP primer validation
-- `read_pair_merger.py` - Paired-end merging
-- `tabtodb.py` - TAB to database conversion
-- `windowshopper.py` - Window-based sequence analysis
-- `rpm_prep` - RPM packaging preparation
+- **[macguffin_acquire.py](macguffin_acquire.py)**
+  - Data acquisition tools
+  - NCBI sequence retrieval
+  - Ensemble gene download

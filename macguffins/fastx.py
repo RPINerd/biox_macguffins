@@ -148,12 +148,12 @@ def subseq_search(records: Generator[SeqRecord], subseqs: list[str]) -> None:
 
     logging.info("Generating reports..")
 
-    with Path.open(hit_file, "w") as hf:
+    with hit_file.open("w", encoding="utf-8") as hf:
         for query_seq, record_list in hit_dict.items():
             hf.write(f"{query_seq}|{",".join([str(record.id) for record in record_list])}\n")
     logging.info("Primer Report Written..")
 
-    with Path.open(nohit_file, "w") as nhf:
+    with nohit_file.open("w", encoding="utf-8") as nhf:
         nhf.write("\n".join([str(record.id) for record in nohit_records]))
     logging.info("Non-Primed Sequences Written..")
 

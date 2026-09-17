@@ -4,7 +4,7 @@
 import subprocess
 from pathlib import Path
 
-from macguffin_utils import extract_sample_info
+from macguffins.utils import extract_sample_info
 
 
 class Primer:
@@ -55,7 +55,7 @@ class RunCollection:
                 self.samples[sample_name] = RunSet(sample_name)
             if read_num == 1:
                 self.samples[sample_name].read_1_fastqs.append(fq)
-            elif read_num == 2:  #noqa
+            elif read_num == 2:  # ruff:ignore[magic-value-comparison]
                 self.samples[sample_name].read_2_fastqs.append(fq)
 
     def merge_all_samples(self) -> None:

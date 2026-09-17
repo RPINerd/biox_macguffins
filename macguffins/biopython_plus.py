@@ -6,7 +6,8 @@
 
 import logging
 
-from Bio.SeqRecord import Seq, SeqRecord
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
 
 logging.basicConfig(
     level=logging.DEBUG,
